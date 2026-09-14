@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   releaser-pleaser:
-    if: github.repository == 'Contentways/poweradmin-cli'
+    if: github.repository == 'contentways/poweradmin-cli'
     runs-on: ubuntu-latest
     permissions:
       contents: write
