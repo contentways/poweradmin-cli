@@ -9,7 +9,7 @@ package state
 import (
 	"context"
 
-	"contentways.dev/contentways/poweradmin-go/v2/poweradmin"
+	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
 
 // State holds the global runtime configuration for the CLI.
