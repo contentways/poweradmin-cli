@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
 	"github.com/contentways/poweradmin-cli/internal/cmd/records"
 	"github.com/contentways/poweradmin-cli/internal/testutil"
+	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
 
 func TestRecordsDelete(t *testing.T) {
