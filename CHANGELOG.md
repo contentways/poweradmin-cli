@@ -1,5 +1,17 @@
 # Changelog
 
+## [v2.0.0](https://github.com/contentways/poweradmin-cli/releases/tag/v2.0.0)
+
+### Features
+
+- add --ttl flag for NS records in zones create
+- **BREAKING**: migrate module path to github.com/contentways/poweradmin-go/v3
+
+### Bug Fixes
+
+- import sorting
+- correct repository case in releaser-pleaser workflow
+
 ## [v1.3.0](https://github.com/Contentways/poweradmin-cli/releases/tag/v1.3.0)
 
 ### Features
