@@ -6,6 +6,7 @@
 package zones
 
 import (
+	"github.com/contentways/poweradmin-cli/internal/cmd/zones/dnssec"
 	"github.com/contentways/poweradmin-cli/internal/state"
 	"github.com/spf13/cobra"
 )
@@ -26,6 +27,7 @@ func NewZonesCommand(s *state.State) *cobra.Command {
 	cmd.AddCommand(NewDeleteCmd(s))
 	cmd.AddCommand(NewExportCmd(s))
 	cmd.AddCommand(NewImportCmd(s))
+	cmd.AddCommand(dnssec.NewDNSSECCommand(s))
 
 	return cmd
 }

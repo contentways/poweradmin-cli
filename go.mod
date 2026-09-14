@@ -3,7 +3,7 @@ module github.com/contentways/poweradmin-cli
 go 1.26.3
 
 require (
-	contentways.dev/contentways/poweradmin-go/v2 v2.0.0
+	contentways.dev/contentways/poweradmin-go/v2 v2.1.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.43.0
 	gopkg.in/yaml.v3 v3.0.1
