@@ -5,7 +5,7 @@ package testutil
 import (
 	"context"
 
-	"contentways.dev/contentways/poweradmin-go/v2/poweradmin"
+	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
 
 // MockZoneClient implements poweradmin.IZoneClient for testing.
@@ -23,6 +23,8 @@ type MockZoneClient struct {
 	AddOwnerFn    func(ctx context.Context, zoneID, userID int) (*poweradmin.Response, error)
 	AddOwnersFn   func(ctx context.Context, zoneID int, userIDs []int) (*poweradmin.Response, error)
 	RemoveOwnerFn func(ctx context.Context, zoneID, userID int) (*poweradmin.Response, error)
+	GetDNSSECFn   func(ctx context.Context, id int) (*poweradmin.ZoneDNSSEC, *poweradmin.Response, error)
+	SetDNSSECFn   func(ctx context.Context, id int, enabled bool) (*poweradmin.ZoneDNSSEC, *poweradmin.Response, error)
 }
 
 func (m *MockZoneClient) GetByID(ctx context.Context, id int) (*poweradmin.Zone, *poweradmin.Response, error) {
@@ -100,4 +102,18 @@ func (m *MockZoneClient) RemoveOwner(ctx context.Context, zoneID, userID int) (*
 		return m.RemoveOwnerFn(ctx, zoneID, userID)
 	}
 	return nil, nil
+}
+
+func (m *MockZoneClient) GetDNSSEC(ctx context.Context, id int) (*poweradmin.ZoneDNSSEC, *poweradmin.Response, error) {
+	if m.GetDNSSECFn != nil {
+		return m.GetDNSSECFn(ctx, id)
+	}
+	return nil, nil, nil
+}
+
+func (m *MockZoneClient) SetDNSSEC(ctx context.Context, id int, enabled bool) (*poweradmin.ZoneDNSSEC, *poweradmin.Response, error) {
+	if m.SetDNSSECFn != nil {
+		return m.SetDNSSECFn(ctx, id, enabled)
+	}
+	return nil, nil, nil
 }
