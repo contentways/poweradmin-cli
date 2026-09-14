@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 package schema
 
-import "github.com/contentways/poweradmin-go/v3/poweradmin"
+import "contentways.dev/contentways/poweradmin-go/v2/poweradmin"
 
 // User is the CLI output schema for a Poweradmin user.
 type User struct {
