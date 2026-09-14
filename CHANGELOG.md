@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.0.1](https://github.com/contentways/poweradmin-cli/releases/tag/v2.0.1)
+
+### Bug Fixes
+
+- derive version/commit from build info when unset via ldflags
+
 ## [v2.0.0](https://github.com/contentways/poweradmin-cli/releases/tag/v2.0.0)
 
 ### Features
