@@ -3,8 +3,8 @@ package schema_test
 import (
 	"testing"
 
+	"contentways.dev/contentways/poweradmin-go/v2/poweradmin"
 	"github.com/contentways/poweradmin-cli/internal/schema"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
 
 func TestGroupFromSDK(t *testing.T) {

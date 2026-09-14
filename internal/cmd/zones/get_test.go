@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
+	"contentways.dev/contentways/poweradmin-go/v2/poweradmin"
 	"github.com/contentways/poweradmin-cli/internal/cmd/zones"
 	"github.com/contentways/poweradmin-cli/internal/testutil"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
 
 func TestZonesGetByName(t *testing.T) {

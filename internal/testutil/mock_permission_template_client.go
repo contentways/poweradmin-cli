@@ -5,7 +5,7 @@ package testutil
 import (
 	"context"
 
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"contentways.dev/contentways/poweradmin-go/v2/poweradmin"
 )
 
 // MockPermissionTemplateClient implements poweradmin.IPermissionTemplateClient for testing.

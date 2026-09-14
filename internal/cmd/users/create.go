@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"os"
 
+	"contentways.dev/contentways/poweradmin-go/v2/poweradmin"
 	"github.com/contentways/poweradmin-cli/internal/cmd/base"
 	"github.com/contentways/poweradmin-cli/internal/output"
 	"github.com/contentways/poweradmin-cli/internal/state"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )

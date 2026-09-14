@@ -6,7 +6,7 @@
 // with snake_case keys, omitted empty fields and a consistent structure.
 package schema
 
-import "github.com/contentways/poweradmin-go/v3/poweradmin"
+import "contentways.dev/contentways/poweradmin-go/v2/poweradmin"
 
 // Zone is the CLI output schema for a DNS zone.
 type Zone struct {
