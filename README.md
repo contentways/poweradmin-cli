@@ -2,7 +2,7 @@
 
 A command-line interface for managing DNS zones, records, users and groups via the [Poweradmin](https://www.poweradmin.org) REST API.
 
-Built with [poweradmin-go](https://contentways.dev/contentways/poweradmin-go) — the Go SDK for Poweradmin.
+Built with [poweradmin-go](https://github.com/contentways/poweradmin-go) — the Go SDK for Poweradmin.
 
 ## Requirements
 
@@ -13,18 +13,18 @@ Built with [poweradmin-go](https://contentways.dev/contentways/poweradmin-go) �
 
 ### From release
 
-Download the latest binary for your platform from the [releases page](https://github.com/Contentways/poweradmin-cli/releases):
+Download the latest binary for your platform from the [releases page](https://github.com/contentways/poweradmin-cli/releases):
 
 ```bash
 # Linux (amd64)
-curl -L https://github.com/Contentways/poweradmin-cli/releases/latest/download/poweradmin-cli_Linux_x86_64.tar.gz | tar xz
+curl -L https://github.com/contentways/poweradmin-cli/releases/latest/download/poweradmin-cli_Linux_x86_64.tar.gz | tar xz
 sudo mv poweradmin /usr/local/bin/
 ```
 
 ### Via go install
 
 ```bash
-go install github.com/Contentways/poweradmin-cli@latest
+go install github.com/contentways/poweradmin-cli@latest
 ```
 
 ### Docker
@@ -41,7 +41,7 @@ docker run --rm \
 ### From source
 
 ```bash
-git clone git@git.contentways.dev:contentways/poweradmin-cli.git
+git clone git@github.com:contentways/poweradmin-cli.git
 cd poweradmin-cli
 make build
 ```
@@ -157,6 +157,21 @@ poweradmin zones import --file example.com.zone
 poweradmin zones import --file example.com.zone --zone-name example.com
 poweradmin zones import --file example.com.zone --create-zone
 poweradmin zones import --file example.com.zone --dry-run
+
+# List all metadata entries for a zone
+poweradmin zones metadata --name example.com
+poweradmin zones metadata --name example.com -o json
+
+# Get metadata for a specific kind
+poweradmin zones metadata-get --name example.com --kind ALLOW-AXFR-FROM
+
+# Set (replace) metadata values for a kind
+poweradmin zones metadata-set --name example.com \
+  --kind ALLOW-AXFR-FROM \
+  --values 192.0.2.10,AUTO-NS
+
+# Delete metadata for a kind
+poweradmin zones metadata-delete --name example.com --kind ALLOW-AXFR-FROM --yes
 ```
 
 ### Records
@@ -344,7 +359,7 @@ Docker images are signed with [cosign](https://github.com/sigstore/cosign) using
 
 ```bash
 cosign verify \
-  --certificate-identity-regexp="https://github.com/Contentways/poweradmin-cli" \
+  --certificate-identity-regexp="https://github.com/contentways/poweradmin-cli" \
   --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
   contentwaysorg/poweradmin-cli:latest
 ```
