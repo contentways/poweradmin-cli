@@ -1,5 +1,11 @@
 # Changelog
 
+## [v3.0.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.0.0)
+
+### Features
+
+- **BREAKING**: move module path to github.com/contentways/poweradmin-cli/v2
+
 ## [v2.1.0](https://github.com/contentways/poweradmin-cli/releases/tag/v2.1.0)
 
 ### Features
