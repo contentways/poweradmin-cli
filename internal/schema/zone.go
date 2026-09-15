@@ -51,3 +51,29 @@ type ZoneWithNameservers struct {
 	Zone
 	Nameservers []string `json:"nameservers,omitempty"`
 }
+
+// ZoneMetadata is the CLI output schema for a single zone metadata kind.
+type ZoneMetadata struct {
+	Kind   string   `json:"kind"`
+	Values []string `json:"values"`
+}
+
+// ZoneMetadataFromSDK converts a poweradmin SDK ZoneMetadata to the CLI output schema.
+func ZoneMetadataFromSDK(m *poweradmin.ZoneMetadata) ZoneMetadata {
+	return ZoneMetadata{Kind: m.Kind, Values: m.Values}
+}
+
+// ZoneMetadataList wraps a slice of zone metadata entries in a root object for JSON output.
+type ZoneMetadataList struct {
+	Metadata []ZoneMetadata `json:"metadata"`
+	Count    int            `json:"count"`
+}
+
+// ZoneMetadataListFromSDK converts a slice of SDK ZoneMetadata to the CLI output schema.
+func ZoneMetadataListFromSDK(metadata []*poweradmin.ZoneMetadata) ZoneMetadataList {
+	out := make([]ZoneMetadata, len(metadata))
+	for i, m := range metadata {
+		out[i] = ZoneMetadataFromSDK(m)
+	}
+	return ZoneMetadataList{Metadata: out, Count: len(out)}
+}
