@@ -1,5 +1,11 @@
 # Changelog
 
+## [v3.0.1](https://github.com/contentways/poweradmin-cli/releases/tag/v3.0.1)
+
+### Bug Fixes
+
+- correct module path suffix to /v3 to match tagged major version
+
 ## [v3.0.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.0.0)
 
 ### Features
