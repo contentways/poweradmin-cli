@@ -15,8 +15,8 @@ builds:
       - -trimpath
     ldflags:
       - -s -w
-      - -X github.com/contentways/poweradmin-cli/internal/version.Version={{ .Version }}
-      - -X github.com/contentways/poweradmin-cli/internal/version.Commit={{ .ShortCommit }}
+      - -X github.com/contentways/poweradmin-cli/v3/internal/version.Version={{ .Version }}
+      - -X github.com/contentways/poweradmin-cli/v3/internal/version.Commit={{ .ShortCommit }}
     goos:
       - linux
       - darwin

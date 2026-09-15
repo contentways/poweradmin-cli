@@ -6,7 +6,7 @@
 package zones
 
 import (
-	"github.com/contentways/poweradmin-cli/v2/internal/state"
+	"github.com/contentways/poweradmin-cli/v3/internal/state"
 	"github.com/spf13/cobra"
 )
 

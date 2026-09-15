@@ -5,7 +5,7 @@ package version
 import (
 	"fmt"
 
-	internalversion "github.com/contentways/poweradmin-cli/v2/internal/version"
+	internalversion "github.com/contentways/poweradmin-cli/v3/internal/version"
 	"github.com/spf13/cobra"
 )
 

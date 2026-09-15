@@ -5,10 +5,10 @@ package zones
 import (
 	"fmt"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/base"
-	"github.com/contentways/poweradmin-cli/v2/internal/output"
-	"github.com/contentways/poweradmin-cli/v2/internal/schema"
-	"github.com/contentways/poweradmin-cli/v2/internal/state"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/base"
+	"github.com/contentways/poweradmin-cli/v3/internal/output"
+	"github.com/contentways/poweradmin-cli/v3/internal/schema"
+	"github.com/contentways/poweradmin-cli/v3/internal/state"
 	"github.com/spf13/cobra"
 )
 

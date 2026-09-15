@@ -3,8 +3,8 @@ package cli_test
 import (
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/cli"
-	"github.com/contentways/poweradmin-cli/v2/internal/state"
+	"github.com/contentways/poweradmin-cli/v3/internal/cli"
+	"github.com/contentways/poweradmin-cli/v3/internal/state"
 )
 
 func TestNewRootCommand(t *testing.T) {

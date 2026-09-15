@@ -3,7 +3,7 @@ package records_test
 import (
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/records"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/records"
 )
 
 func TestNewRecordsCommand(t *testing.T) {

@@ -3,7 +3,7 @@ package schema_test
 import (
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/schema"
+	"github.com/contentways/poweradmin-cli/v3/internal/schema"
 	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
 
