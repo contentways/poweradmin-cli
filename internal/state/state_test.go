@@ -6,8 +6,8 @@ import (
 	"context"
 	"testing"
 
-	"contentways.dev/contentways/poweradmin-go/v2/poweradmin"
 	"github.com/contentways/poweradmin-cli/internal/state"
+	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
 
 func TestNew(t *testing.T) {
