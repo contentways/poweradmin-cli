@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/contentways/poweradmin-cli/internal/output"
-	"github.com/contentways/poweradmin-cli/internal/state"
+	"github.com/contentways/poweradmin-cli/v2/internal/output"
+	"github.com/contentways/poweradmin-cli/v2/internal/state"
 	"github.com/spf13/cobra"
 )
 

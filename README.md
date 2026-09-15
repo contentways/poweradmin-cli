@@ -24,7 +24,7 @@ sudo mv poweradmin /usr/local/bin/
 ### Via go install
 
 ```bash
-go install github.com/contentways/poweradmin-cli@latest
+go install github.com/contentways/poweradmin-cli/v2@latest
 ```
 
 ### Docker

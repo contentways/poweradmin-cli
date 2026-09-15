@@ -3,7 +3,7 @@ package groups_test
 import (
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/internal/cmd/groups"
+	"github.com/contentways/poweradmin-cli/v2/internal/cmd/groups"
 )
 
 func TestNewGroupsCommand(t *testing.T) {

@@ -5,7 +5,7 @@ package permission_templates_test
 import (
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/internal/cmd/permission_templates"
+	"github.com/contentways/poweradmin-cli/v2/internal/cmd/permission_templates"
 )
 
 func TestNewPermissionTemplatesCommand(t *testing.T) {

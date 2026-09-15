@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/internal/state"
+	"github.com/contentways/poweradmin-cli/v2/internal/state"
 	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
 
