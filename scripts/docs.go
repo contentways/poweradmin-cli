@@ -12,8 +12,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/contentways/poweradmin-cli/internal/cli"
-	"github.com/contentways/poweradmin-cli/internal/state"
+	"github.com/contentways/poweradmin-cli/v2/internal/cli"
+	"github.com/contentways/poweradmin-cli/v2/internal/state"
 	"github.com/spf13/cobra/doc"
 )
 

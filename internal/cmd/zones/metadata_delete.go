@@ -5,8 +5,8 @@ package zones
 import (
 	"fmt"
 
-	"github.com/contentways/poweradmin-cli/internal/cmd/base"
-	"github.com/contentways/poweradmin-cli/internal/state"
+	"github.com/contentways/poweradmin-cli/v2/internal/cmd/base"
+	"github.com/contentways/poweradmin-cli/v2/internal/state"
 	"github.com/spf13/cobra"
 )
 

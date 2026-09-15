@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/internal/cmd/users"
-	"github.com/contentways/poweradmin-cli/internal/testutil"
+	"github.com/contentways/poweradmin-cli/v2/internal/cmd/users"
+	"github.com/contentways/poweradmin-cli/v2/internal/testutil"
 	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
 

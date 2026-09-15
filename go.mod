@@ -1,4 +1,4 @@
-module github.com/contentways/poweradmin-cli
+module github.com/contentways/poweradmin-cli/v2
 
 go 1.26.3
 

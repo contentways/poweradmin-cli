@@ -39,12 +39,3 @@ func init() {
 		}
 	}
 }
-
-func vcsModified(settings []debug.BuildSetting) bool {
-	for _, s := range settings {
-		if s.Key == "vcs.modified" {
-			return s.Value == "true"
-		}
-	}
-	return false
-}
