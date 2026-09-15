@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/config"
+	"github.com/contentways/poweradmin-cli/v3/internal/config"
 )
 
 func TestLoadMissingFile(t *testing.T) {

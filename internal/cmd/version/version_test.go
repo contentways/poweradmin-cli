@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	cmdversion "github.com/contentways/poweradmin-cli/v2/internal/cmd/version"
-	"github.com/contentways/poweradmin-cli/v2/internal/state"
+	cmdversion "github.com/contentways/poweradmin-cli/v3/internal/cmd/version"
+	"github.com/contentways/poweradmin-cli/v3/internal/state"
 )
 
 func TestVersionCmd(t *testing.T) {

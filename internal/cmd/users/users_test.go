@@ -3,7 +3,7 @@ package users_test
 import (
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/users"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/users"
 )
 
 func TestNewUsersCommand(t *testing.T) {

@@ -13,9 +13,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/cli"
-	"github.com/contentways/poweradmin-cli/v2/internal/config"
-	"github.com/contentways/poweradmin-cli/v2/internal/state"
+	"github.com/contentways/poweradmin-cli/v3/internal/cli"
+	"github.com/contentways/poweradmin-cli/v3/internal/config"
+	"github.com/contentways/poweradmin-cli/v3/internal/state"
 )
 
 func main() {

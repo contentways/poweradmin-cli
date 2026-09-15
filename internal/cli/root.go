@@ -7,13 +7,13 @@ package cli
 import (
 	"os"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/groups"
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/permission_templates"
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/records"
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/users"
-	cmdversion "github.com/contentways/poweradmin-cli/v2/internal/cmd/version"
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/zones"
-	"github.com/contentways/poweradmin-cli/v2/internal/state"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/groups"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/permission_templates"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/records"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/users"
+	cmdversion "github.com/contentways/poweradmin-cli/v3/internal/cmd/version"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/zones"
+	"github.com/contentways/poweradmin-cli/v3/internal/state"
 	"github.com/spf13/cobra"
 )
 

@@ -3,7 +3,7 @@ package zones_test
 import (
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/zones"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/zones"
 )
 
 func TestNewZonesCommand(t *testing.T) {

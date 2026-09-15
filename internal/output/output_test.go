@@ -5,7 +5,7 @@ package output_test
 import (
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/output"
+	"github.com/contentways/poweradmin-cli/v3/internal/output"
 )
 
 func TestParseFormat(t *testing.T) {

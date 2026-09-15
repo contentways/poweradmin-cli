@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/output"
+	"github.com/contentways/poweradmin-cli/v3/internal/output"
 )
 
 func TestTableOutput(t *testing.T) {

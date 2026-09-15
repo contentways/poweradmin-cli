@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/base"
-	"github.com/contentways/poweradmin-cli/v2/internal/state"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/base"
+	"github.com/contentways/poweradmin-cli/v3/internal/state"
 	"github.com/spf13/cobra"
 )
 

@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/contentways/poweradmin-cli/v2/internal/cmd/zones"
-	"github.com/contentways/poweradmin-cli/v2/internal/testutil"
+	"github.com/contentways/poweradmin-cli/v3/internal/cmd/zones"
+	"github.com/contentways/poweradmin-cli/v3/internal/testutil"
 	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
 
