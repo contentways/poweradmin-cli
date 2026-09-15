@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.1.0](https://github.com/contentways/poweradmin-cli/releases/tag/v2.1.0)
+
+### Features
+
+- add zone metadata commands (list, get, set, delete)
+
 ## [v2.0.1](https://github.com/contentways/poweradmin-cli/releases/tag/v2.0.1)
 
 ### Bug Fixes
