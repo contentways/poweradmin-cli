@@ -13,7 +13,7 @@ func TestNewZonesCommand(t *testing.T) {
 		t.Fatalf("Use = %q", cmd.Use)
 	}
 
-	if len(cmd.Commands()) != 6 {
+	if len(cmd.Commands()) != 10 {
 		t.Fatalf("got %d subcommands, want 6", len(cmd.Commands()))
 	}
 }

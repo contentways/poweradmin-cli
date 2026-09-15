@@ -12,19 +12,23 @@ import (
 // Each method can be overridden by setting the corresponding function field.
 // Unset fields return zero values and no error by default.
 type MockZoneClient struct {
-	GetByIDFn     func(ctx context.Context, id int) (*poweradmin.Zone, *poweradmin.Response, error)
-	GetByNameFn   func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error)
-	ListFn        func(ctx context.Context, opts poweradmin.ListOpts) ([]*poweradmin.Zone, *poweradmin.Response, error)
-	AllFn         func(ctx context.Context) ([]*poweradmin.Zone, error)
-	CreateFn      func(ctx context.Context, opts poweradmin.ZoneCreateOpts) (int, *poweradmin.Response, error)
-	UpdateFn      func(ctx context.Context, id int, opts poweradmin.ZoneUpdateOpts) (*poweradmin.Zone, *poweradmin.Response, error)
-	DeleteFn      func(ctx context.Context, id int) (*poweradmin.Response, error)
-	OwnersFn      func(ctx context.Context, zoneID int) ([]*poweradmin.ZoneOwner, *poweradmin.Response, error)
-	AddOwnerFn    func(ctx context.Context, zoneID, userID int) (*poweradmin.Response, error)
-	AddOwnersFn   func(ctx context.Context, zoneID int, userIDs []int) (*poweradmin.Response, error)
-	RemoveOwnerFn func(ctx context.Context, zoneID, userID int) (*poweradmin.Response, error)
-	GetDNSSECFn   func(ctx context.Context, id int) (*poweradmin.ZoneDNSSEC, *poweradmin.Response, error)
-	SetDNSSECFn   func(ctx context.Context, id int, enabled bool) (*poweradmin.ZoneDNSSEC, *poweradmin.Response, error)
+	GetByIDFn        func(ctx context.Context, id int) (*poweradmin.Zone, *poweradmin.Response, error)
+	GetByNameFn      func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error)
+	ListFn           func(ctx context.Context, opts poweradmin.ListOpts) ([]*poweradmin.Zone, *poweradmin.Response, error)
+	AllFn            func(ctx context.Context) ([]*poweradmin.Zone, error)
+	CreateFn         func(ctx context.Context, opts poweradmin.ZoneCreateOpts) (int, *poweradmin.Response, error)
+	UpdateFn         func(ctx context.Context, id int, opts poweradmin.ZoneUpdateOpts) (*poweradmin.Zone, *poweradmin.Response, error)
+	DeleteFn         func(ctx context.Context, id int) (*poweradmin.Response, error)
+	OwnersFn         func(ctx context.Context, zoneID int) ([]*poweradmin.ZoneOwner, *poweradmin.Response, error)
+	AddOwnerFn       func(ctx context.Context, zoneID, userID int) (*poweradmin.Response, error)
+	AddOwnersFn      func(ctx context.Context, zoneID int, userIDs []int) (*poweradmin.Response, error)
+	RemoveOwnerFn    func(ctx context.Context, zoneID, userID int) (*poweradmin.Response, error)
+	GetDNSSECFn      func(ctx context.Context, id int) (*poweradmin.ZoneDNSSEC, *poweradmin.Response, error)
+	SetDNSSECFn      func(ctx context.Context, id int, enabled bool) (*poweradmin.ZoneDNSSEC, *poweradmin.Response, error)
+	ListMetadataFn   func(ctx context.Context, zoneID int) ([]*poweradmin.ZoneMetadata, *poweradmin.Response, error)
+	GetMetadataFn    func(ctx context.Context, zoneID int, kind string) (*poweradmin.ZoneMetadata, *poweradmin.Response, error)
+	SetMetadataFn    func(ctx context.Context, zoneID int, kind string, values []string) (*poweradmin.Response, error)
+	DeleteMetadataFn func(ctx context.Context, zoneID int, kind string) (*poweradmin.Response, error)
 }
 
 func (m *MockZoneClient) GetByID(ctx context.Context, id int) (*poweradmin.Zone, *poweradmin.Response, error) {
@@ -116,4 +120,32 @@ func (m *MockZoneClient) SetDNSSEC(ctx context.Context, id int, enabled bool) (*
 		return m.SetDNSSECFn(ctx, id, enabled)
 	}
 	return nil, nil, nil
+}
+
+func (m *MockZoneClient) ListMetadata(ctx context.Context, zoneID int) ([]*poweradmin.ZoneMetadata, *poweradmin.Response, error) {
+	if m.ListMetadataFn != nil {
+		return m.ListMetadataFn(ctx, zoneID)
+	}
+	return nil, nil, nil
+}
+
+func (m *MockZoneClient) GetMetadata(ctx context.Context, zoneID int, kind string) (*poweradmin.ZoneMetadata, *poweradmin.Response, error) {
+	if m.GetMetadataFn != nil {
+		return m.GetMetadataFn(ctx, zoneID, kind)
+	}
+	return nil, nil, nil
+}
+
+func (m *MockZoneClient) SetMetadata(ctx context.Context, zoneID int, kind string, values []string) (*poweradmin.Response, error) {
+	if m.SetMetadataFn != nil {
+		return m.SetMetadataFn(ctx, zoneID, kind, values)
+	}
+	return nil, nil
+}
+
+func (m *MockZoneClient) DeleteMetadata(ctx context.Context, zoneID int, kind string) (*poweradmin.Response, error) {
+	if m.DeleteMetadataFn != nil {
+		return m.DeleteMetadataFn(ctx, zoneID, kind)
+	}
+	return nil, nil
 }
