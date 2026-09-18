@@ -6,13 +6,13 @@ import "github.com/contentways/poweradmin-go/v3/poweradmin"
 
 // Record is the CLI output schema for a DNS record.
 type Record struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Content  string `json:"content"`
-	TTL      int    `json:"ttl"`
-	Priority int    `json:"priority,omitempty"`
-	Disabled bool   `json:"disabled,omitempty"`
+	ID       string `json:"id" yaml:"id"`
+	Name     string `json:"name" yaml:"name"`
+	Type     string `json:"type" yaml:"type"`
+	Content  string `json:"content" yaml:"content"`
+	TTL      int    `json:"ttl" yaml:"ttl"`
+	Priority int    `json:"priority,omitempty" yaml:"priority,omitempty"`
+	Disabled bool   `json:"disabled,omitempty" yaml:"disabled,omitempty"`
 }
 
 // RecordFromSDK converts a poweradmin SDK Record to the CLI output schema.
@@ -30,8 +30,8 @@ func RecordFromSDK(r *poweradmin.Record) Record {
 
 // RecordList wraps a slice of records in a root object for JSON output.
 type RecordList struct {
-	Records []Record `json:"records"`
-	Count   int      `json:"count"`
+	Records []Record `json:"records" yaml:"records"`
+	Count   int      `json:"count" yaml:"count"`
 }
 
 // RecordListFromSDK converts a slice of SDK Records to the CLI output schema.
