@@ -1,5 +1,14 @@
 # Changelog
 
+## [v3.1.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.1.0)
+
+### Features
+
+- Add Yaml Output
+- Add Yaml Output
+- Add Yaml Annotations to Schema and add New test Function for YAML
+- add yaml output format alongside json
+
 ## [v3.0.1](https://github.com/contentways/poweradmin-cli/releases/tag/v3.0.1)
 
 ### Bug Fixes
