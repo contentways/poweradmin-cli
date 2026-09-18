@@ -35,8 +35,8 @@ func NewListCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, schema.GroupListFromSDK(groups))
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, schema.GroupListFromSDK(groups))
 			}
 
 			t := base.NewTable(cmd)
@@ -63,7 +63,7 @@ func NewListCmd(s *state.State) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().Bool("no-header", false, "Suppress table header row")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.GroupNameCompletion(s))

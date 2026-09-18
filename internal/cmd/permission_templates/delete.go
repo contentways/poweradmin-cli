@@ -68,8 +68,8 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, map[string]any{
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, map[string]any{
 					"id":   tmplID,
 					"name": tmplName,
 				})
@@ -82,7 +82,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 
 	cmd.Flags().String("name", "", "Template name to identify the template")
 	cmd.Flags().String("id", "", "Template ID to identify the template")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("yes", "y", false, "Skip confirmation prompt")
 	cmd.Flags().BoolP("quiet", "q", false, "Suppress output after deletion")
 	cmd.RegisterFlagCompletionFunc("name", base.PermissionTemplateNameCompletion(s))

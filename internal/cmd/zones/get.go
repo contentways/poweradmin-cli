@@ -52,8 +52,8 @@ func NewGetCmd(s *state.State) *cobra.Command {
 				}
 			}
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, schema.ZoneWithNameservers{
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, schema.ZoneWithNameservers{
 					Zone:        schema.ZoneFromSDK(zone),
 					Nameservers: nameservers,
 				})
@@ -77,7 +77,7 @@ func NewGetCmd(s *state.State) *cobra.Command {
 
 	cmd.Flags().String("name", "", "Zone name (e.g. example.com)")
 	cmd.Flags().String("id", "", "Zone ID")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.ZoneNameCompletion(s))
 	return cmd

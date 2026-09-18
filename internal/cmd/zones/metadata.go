@@ -45,8 +45,8 @@ func NewMetadataCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, schema.ZoneMetadataListFromSDK(metadata))
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, schema.ZoneMetadataListFromSDK(metadata))
 			}
 
 			t := base.NewTable(cmd)
@@ -62,7 +62,7 @@ func NewMetadataCmd(s *state.State) *cobra.Command {
 
 	cmd.Flags().String("name", "", "Zone name (e.g. example.com)")
 	cmd.Flags().String("id", "", "Zone ID")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().Bool("no-header", false, "Suppress table header row")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.ZoneNameCompletion(s))

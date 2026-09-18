@@ -64,8 +64,8 @@ func NewCreateCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, tmpl)
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, tmpl)
 			}
 
 			if base.IsQuiet(cmd) {
@@ -82,7 +82,7 @@ func NewCreateCmd(s *state.State) *cobra.Command {
 	cmd.Flags().String("description", "", "Template description")
 	cmd.Flags().String("type", "user", "Template type. One of: user|group")
 	cmd.Flags().StringSlice("permissions", []string{}, "Permission IDs to assign (comma-separated or multiple flags)")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("quiet", "q", false, "Only print the ID of the created template")
 	return cmd
 }

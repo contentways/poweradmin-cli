@@ -57,8 +57,8 @@ func NewCreateCmd() *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, map[string]any{
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, map[string]any{
 					"id":      id,
 					"name":    name,
 					"type":    recordType,
@@ -85,7 +85,7 @@ func NewCreateCmd() *cobra.Command {
 	cmd.Flags().String("content", "", "Record content (e.g. 1.2.3.4 for A records)")
 	cmd.Flags().Int("ttl", 3600, "Time to live in seconds (default: 3600)")
 	cmd.Flags().Int("priority", 0, "Record priority, used for MX records (default: 0)")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("quiet", "q", false, "Only print the ID of the created record")
 	return cmd
 }

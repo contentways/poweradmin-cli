@@ -98,8 +98,8 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, updated)
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, updated)
 			}
 
 			fmt.Fprintf(cmd.OutOrStdout(), "updated permission template %s (id %d)\n", updated.Name, updated.ID)
@@ -113,7 +113,7 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 	cmd.Flags().String("description", "", "New description")
 	cmd.Flags().String("type", "", "New template type. One of: user|group")
 	cmd.Flags().StringSlice("permissions", []string{}, "New permission IDs (replaces existing)")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.RegisterFlagCompletionFunc("name", base.PermissionTemplateNameCompletion(s))
 	return cmd
 }

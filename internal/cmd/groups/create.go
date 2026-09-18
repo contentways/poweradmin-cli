@@ -46,8 +46,8 @@ func NewCreateCmd() *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, map[string]any{
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, map[string]any{
 					"id":   id,
 					"name": name,
 				})
@@ -66,7 +66,7 @@ func NewCreateCmd() *cobra.Command {
 	cmd.Flags().String("name", "", "Group name (required)")
 	cmd.Flags().String("description", "", "Group description")
 	cmd.Flags().Int("perm-template-id", 0, "Permission template ID")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("quiet", "q", false, "Only print the ID of the created group")
 	return cmd
 }

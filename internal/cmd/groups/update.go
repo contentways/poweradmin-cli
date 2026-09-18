@@ -55,8 +55,8 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, schema.GroupFromSDK(updated))
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, schema.GroupFromSDK(updated))
 			}
 
 			fmt.Fprintf(cmd.OutOrStdout(), "updated group %s (id %d)\n", updated.Name, updated.ID)
@@ -68,7 +68,7 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 	cmd.Flags().String("id", "", "Group ID to identify the group")
 	cmd.Flags().String("new-name", "", "New group name")
 	cmd.Flags().String("description", "", "New description")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.GroupNameCompletion(s))
 	return cmd

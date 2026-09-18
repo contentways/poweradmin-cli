@@ -61,8 +61,8 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, schema.UserFromSDK(updated))
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, schema.UserFromSDK(updated))
 			}
 
 			fmt.Fprintf(cmd.OutOrStdout(), "updated user %s (id %d)\n", updated.Username, updated.ID)
@@ -76,7 +76,7 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 	cmd.Flags().String("fullname", "", "New full name")
 	cmd.Flags().String("password", "", "New password")
 	cmd.Flags().Bool("active", true, "Whether the user is active")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.ZoneNameCompletion(s))
 	return cmd

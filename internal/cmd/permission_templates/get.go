@@ -63,8 +63,8 @@ func NewGetCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, tmpl)
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, tmpl)
 			}
 
 			fmt.Fprintf(cmd.OutOrStdout(), "ID:          %d\n", tmpl.ID)
@@ -84,7 +84,7 @@ func NewGetCmd(s *state.State) *cobra.Command {
 
 	cmd.Flags().String("name", "", "Permission template name")
 	cmd.Flags().String("id", "", "Permission template ID")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.RegisterFlagCompletionFunc("name", base.PermissionTemplateNameCompletion(s))
 	return cmd
 }

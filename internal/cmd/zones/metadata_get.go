@@ -48,8 +48,8 @@ func NewMetadataGetCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, schema.ZoneMetadataFromSDK(m))
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, schema.ZoneMetadataFromSDK(m))
 			}
 
 			fmt.Fprintf(cmd.OutOrStdout(), "Kind: %s\n", m.Kind)
@@ -64,7 +64,7 @@ func NewMetadataGetCmd(s *state.State) *cobra.Command {
 	cmd.Flags().String("name", "", "Zone name (e.g. example.com)")
 	cmd.Flags().String("id", "", "Zone ID")
 	cmd.Flags().String("kind", "", "Metadata kind (e.g. ALLOW-AXFR-FROM) (required)")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.ZoneNameCompletion(s))
 	return cmd
