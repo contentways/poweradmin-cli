@@ -68,8 +68,8 @@ func NewListCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, schema.ZoneListFromSDK(zones))
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, schema.ZoneListFromSDK(zones))
 			}
 
 			t := base.NewTable(cmd)
@@ -86,7 +86,7 @@ func NewListCmd(s *state.State) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|full")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml|full")
 	cmd.Flags().Bool("no-header", false, "Suppress table header row")
 	cmd.Flags().String("type", "", "Filter by zone type. One of: NATIVE|MASTER|SLAVE")
 	cmd.Flags().String("name-filter", "", "Filter by zone name (substring match)")

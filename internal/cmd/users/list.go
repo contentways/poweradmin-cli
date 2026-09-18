@@ -62,8 +62,8 @@ func NewListCmd() *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, schema.UserListFromSDK(users))
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, schema.UserListFromSDK(users))
 			}
 
 			t := base.NewTable(cmd)
@@ -89,7 +89,7 @@ func NewListCmd() *cobra.Command {
 
 	cmd.Flags().Bool("active", false, "Filter by active status (--active or --active=false)")
 	cmd.Flags().String("sort", "", "Sort by field. One of: id|username|email")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().Bool("no-header", false, "Suppress table header row")
 	return cmd
 }

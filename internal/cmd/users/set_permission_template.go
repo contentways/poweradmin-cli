@@ -55,8 +55,8 @@ func NewSetPermissionTemplateCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, map[string]any{
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, map[string]any{
 					"user_id":     user.ID,
 					"username":    user.Username,
 					"template_id": templateID,
@@ -71,7 +71,7 @@ func NewSetPermissionTemplateCmd(s *state.State) *cobra.Command {
 	cmd.Flags().String("name", "", "Username to identify the user")
 	cmd.Flags().String("id", "", "User ID to identify the user")
 	cmd.Flags().String("template-id", "", "Permission template ID to assign (required)")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.ZoneNameCompletion(s))
 	return cmd

@@ -6,12 +6,12 @@ import "github.com/contentways/poweradmin-go/v3/poweradmin"
 
 // Group is the CLI output schema for a Poweradmin group.
 type Group struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	PermTemplID int    `json:"perm_templ_id,omitempty"`
-	MemberCount int    `json:"member_count,omitempty"`
-	ZoneCount   int    `json:"zone_count,omitempty"`
+	ID          int    `json:"id" yaml:"id"`
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+	PermTemplID int    `json:"perm_templ_id,omitempty" yaml:"perm_templ_id,omitempty"`
+	MemberCount int    `json:"member_count,omitempty" yaml:"member_count,omitempty"`
+	ZoneCount   int    `json:"zone_count,omitempty" yaml:"zone_count,omitempty"`
 }
 
 // GroupFromSDK converts a poweradmin SDK Group to the CLI output schema.
@@ -28,8 +28,8 @@ func GroupFromSDK(g *poweradmin.Group) Group {
 
 // GroupList wraps a slice of groups in a root object for JSON output.
 type GroupList struct {
-	Groups []Group `json:"groups"`
-	Count  int     `json:"count"`
+	Groups []Group `json:"groups" yaml:"groups"`
+	Count  int     `json:"count" yaml:"count"`
 }
 
 // GroupListFromSDK converts a slice of SDK Groups to the CLI output schema.

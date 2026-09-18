@@ -34,7 +34,7 @@ func NewListCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
+			if outputFmt.IsStructured() {
 				type templateJSON struct {
 					ID           int    `json:"id"`
 					Name         string `json:"name"`
@@ -54,7 +54,7 @@ func NewListCmd(s *state.State) *cobra.Command {
 						TemplateType: t.TemplateType,
 					})
 				}
-				return base.PrintJSON(cmd, list)
+				return base.PrintFormatted(cmd, outputFmt, list)
 			}
 
 			t := base.NewTable(cmd)
@@ -72,7 +72,7 @@ func NewListCmd(s *state.State) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().Bool("no-header", false, "Suppress table header row")
 	return cmd
 }

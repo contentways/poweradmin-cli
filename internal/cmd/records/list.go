@@ -74,8 +74,8 @@ func NewListCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, schema.RecordListFromSDK(records))
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, schema.RecordListFromSDK(records))
 			}
 
 			t := base.NewTable(cmd)
@@ -100,7 +100,7 @@ func NewListCmd(s *state.State) *cobra.Command {
 	cmd.Flags().String("zone-name", "", "Zone name (e.g. example.com)")
 	cmd.Flags().String("zone-id", "", "Zone ID")
 	cmd.Flags().String("type", "", "Filter by record type (e.g. A, AAAA, MX, TXT)")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|full|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|full|json|yaml")
 	cmd.Flags().Bool("no-header", false, "Suppress table header row")
 	cmd.Flags().String("sort", "", "Sort by field. One of: name|type|ttl")
 	// Register shell completion for --name flag.

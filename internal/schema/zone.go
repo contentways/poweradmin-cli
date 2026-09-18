@@ -10,13 +10,13 @@ import "github.com/contentways/poweradmin-go/v3/poweradmin"
 
 // Zone is the CLI output schema for a DNS zone.
 type Zone struct {
-	ID           int    `json:"id"`
-	Name         string `json:"name"`
-	Type         string `json:"type"`
-	Masters      string `json:"masters,omitempty"`
-	Description  string `json:"description,omitempty"`
-	SOASerial    int    `json:"soa_serial,omitempty"`
-	DNSSECSigned bool   `json:"dnssec_signed,omitempty"`
+	ID           int    `json:"id" yaml:"id"`
+	Name         string `json:"name" yaml:"name"`
+	Type         string `json:"type" yaml:"type"`
+	Masters      string `json:"masters,omitempty" yaml:"masters,omitempty"`
+	Description  string `json:"description,omitempty" yaml:"description,omitempty"`
+	SOASerial    int    `json:"soa_serial,omitempty" yaml:"soa_serial,omitempty"`
+	DNSSECSigned bool   `json:"dnssec_signed,omitempty" yaml:"dnssec_signed,omitempty"`
 }
 
 // ZoneFromSDK converts a poweradmin SDK Zone to the CLI output schema.
@@ -34,8 +34,8 @@ func ZoneFromSDK(z *poweradmin.Zone) Zone {
 
 // ZoneList wraps a slice of zones in a root object for JSON output.
 type ZoneList struct {
-	Zones []Zone `json:"zones"`
-	Count int    `json:"count"`
+	Zones []Zone `json:"zones" yaml:"zones"`
+	Count int    `json:"count" yaml:"count"`
 }
 
 // ZoneListFromSDK converts a slice of SDK Zones to the CLI output schema.
@@ -49,13 +49,13 @@ func ZoneListFromSDK(zones []*poweradmin.Zone) ZoneList {
 
 type ZoneWithNameservers struct {
 	Zone
-	Nameservers []string `json:"nameservers,omitempty"`
+	Nameservers []string `json:"nameservers,omitempty" yaml:"nameservers,omitempty"`
 }
 
 // ZoneMetadata is the CLI output schema for a single zone metadata kind.
 type ZoneMetadata struct {
-	Kind   string   `json:"kind"`
-	Values []string `json:"values"`
+	Kind   string   `json:"kind" yaml:"kind"`
+	Values []string `json:"values" yaml:"values"`
 }
 
 // ZoneMetadataFromSDK converts a poweradmin SDK ZoneMetadata to the CLI output schema.
@@ -65,8 +65,8 @@ func ZoneMetadataFromSDK(m *poweradmin.ZoneMetadata) ZoneMetadata {
 
 // ZoneMetadataList wraps a slice of zone metadata entries in a root object for JSON output.
 type ZoneMetadataList struct {
-	Metadata []ZoneMetadata `json:"metadata"`
-	Count    int            `json:"count"`
+	Metadata []ZoneMetadata `json:"metadata" yaml:"metadata"`
+	Count    int            `json:"count" yaml:"count"`
 }
 
 // ZoneMetadataListFromSDK converts a slice of SDK ZoneMetadata to the CLI output schema.

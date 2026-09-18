@@ -57,8 +57,8 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, map[string]any{
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, map[string]any{
 					"id":      recordID,
 					"zone_id": zoneID,
 				})
@@ -72,7 +72,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 	cmd.Flags().String("zone-name", "", "Zone name (e.g. example.com)")
 	cmd.Flags().String("zone-id", "", "Zone ID")
 	cmd.Flags().String("id", "", "Record ID (opaque string returned by the API)")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("yes", "y", false, "Skip confirmation prompt")
 	cmd.Flags().BoolP("quiet", "q", false, "Suppress output after deletion")
 	// Register shell completion for --name flag.

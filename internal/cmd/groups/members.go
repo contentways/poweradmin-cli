@@ -3,7 +3,6 @@
 package groups
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -56,16 +55,11 @@ func NewMembersCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				data, err := json.MarshalIndent(map[string]any{
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, map[string]any{
 					"members": members,
 					"count":   len(members),
-				}, "", "  ")
-				if err != nil {
-					return fmt.Errorf("failed to marshal json: %w", err)
-				}
-				fmt.Fprintln(cmd.OutOrStdout(), string(data))
-				return nil
+				})
 			}
 
 			t := output.New(cmd.OutOrStdout())
@@ -83,7 +77,7 @@ func NewMembersCmd(s *state.State) *cobra.Command {
 
 	cmd.Flags().String("name", "", "Group name")
 	cmd.Flags().String("id", "", "Group ID")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().Bool("no-header", false, "Suppress table header row")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.GroupNameCompletion(s))

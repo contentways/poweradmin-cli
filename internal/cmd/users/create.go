@@ -80,8 +80,8 @@ func NewCreateCmd() *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, map[string]any{
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, map[string]any{
 					"id":       id,
 					"username": username,
 					"email":    email,
@@ -103,7 +103,7 @@ func NewCreateCmd() *cobra.Command {
 	cmd.Flags().String("email", "", "Email address (required)")
 	cmd.Flags().String("fullname", "", "Full name")
 	cmd.Flags().Bool("active", true, "Whether the user is active (default: true)")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("quiet", "q", false, "Only print the ID of the created user")
 	return cmd
 }

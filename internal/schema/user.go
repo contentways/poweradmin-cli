@@ -6,11 +6,11 @@ import "github.com/contentways/poweradmin-go/v3/poweradmin"
 
 // User is the CLI output schema for a Poweradmin user.
 type User struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Fullname string `json:"fullname,omitempty"`
-	Active   bool   `json:"active"`
+	ID       int    `json:"id" yaml:"id"`
+	Username string `json:"username" yaml:"username"`
+	Email    string `json:"email" yaml:"email"`
+	Fullname string `json:"fullname,omitempty" yaml:"fullname,omitempty"`
+	Active   bool   `json:"active" yaml:"active"`
 }
 
 // UserFromSDK converts a poweradmin SDK User to the CLI output schema.
@@ -26,8 +26,8 @@ func UserFromSDK(u *poweradmin.User) User {
 
 // UserList wraps a slice of users in a root object for JSON output.
 type UserList struct {
-	Users []User `json:"users"`
-	Count int    `json:"count"`
+	Users []User `json:"users" yaml:"users"`
+	Count int    `json:"count" yaml:"count"`
 }
 
 // UserListFromSDK converts a slice of SDK Users to the CLI output schema.

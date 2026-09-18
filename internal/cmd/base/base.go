@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/contentways/poweradmin-cli/v3/internal/output"
 	"github.com/contentways/poweradmin-cli/v3/internal/state"
 	"github.com/contentways/poweradmin-go/v3/poweradmin"
@@ -28,6 +30,27 @@ func PrintJSON(cmd *cobra.Command, v any) error {
 	}
 	fmt.Fprintln(cmd.OutOrStdout(), string(data))
 	return nil
+}
+
+// PrintYAML marshals v to YAML and writes it to cmd's stdout.
+func PrintYAML(cmd *cobra.Command, v any) error {
+	data, err := yaml.Marshal(v)
+	if err != nil {
+		return fmt.Errorf("failed to marshal yaml: %w", err)
+	}
+	fmt.Fprint(cmd.OutOrStdout(), string(data))
+	return nil
+}
+
+// PrintFormatted writes v to cmd's stdout in the given structured format
+// (JSON or YAML). Callers should only invoke this for a Format where
+// IsStructured() is true; table/full output is handled separately via
+// NewTable. Unrecognised formats fall back to JSON.
+func PrintFormatted(cmd *cobra.Command, format output.Format, v any) error {
+	if format == output.FormatYAML {
+		return PrintYAML(cmd, v)
+	}
+	return PrintJSON(cmd, v)
 }
 
 // NewTable creates a new output.Table writing to cmd's stdout.

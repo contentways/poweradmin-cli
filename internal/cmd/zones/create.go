@@ -54,8 +54,8 @@ func NewCreateCmd() *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			if outputFmt == output.FormatJSON {
-				return base.PrintJSON(cmd, map[string]any{
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, map[string]any{
 					"id":          id,
 					"name":        args[0],
 					"type":        zoneType,
@@ -77,7 +77,7 @@ func NewCreateCmd() *cobra.Command {
 	cmd.Flags().String("type", "NATIVE", "Zone type. One of: NATIVE|MASTER|SLAVE")
 	cmd.Flags().StringSlice("nameserver", []string{}, "Nameserver to add (comma-separated or multiple flags)")
 	cmd.Flags().Int("ttl", 3600, "TTL for the created NS records")
-	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json")
+	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("quiet", "q", false, "Only print the ID of the created zone")
 	return cmd
 }

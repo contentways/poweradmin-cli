@@ -3,7 +3,6 @@
 package records
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -94,14 +93,9 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 			outputStr, _ := cmd.Flags().GetString("output")
 			outputFmt := output.ParseFormat(outputStr)
 
-			// JSON output — return the updated record.
-			if outputFmt == output.FormatJSON {
-				data, err := json.MarshalIndent(schema.RecordFromSDK(record), "", "  ")
-				if err != nil {
-					return fmt.Errorf("failed to marshal json: %w", err)
-				}
-				fmt.Fprintln(cmd.OutOrStdout(), string(data))
-				return nil
+			// Structured output — return the updated record.
+			if outputFmt.IsStructured() {
+				return base.PrintFormatted(cmd, outputFmt, schema.RecordFromSDK(record))
 			}
 
 			// Default output — human-readable confirmation.
