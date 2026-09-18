@@ -115,7 +115,7 @@ source ~/.bash_completion.d/poweradmin
 |------|-------|-------------|
 | `--url` | `-u` | Poweradmin URL |
 | `--api-key` | `-k` | Poweradmin API key |
-| `--output` | `-o` | Output format: `table`, `full`, `json` |
+| `--output` | `-o` | Output format: `table`, `full`, `json`, `yaml` |
 | `--no-header` | | Suppress table header row |
 | `--quiet` | `-q` | Only print ID (create) or suppress output (delete) |
 | `--yes` | `-y` | Skip delete confirmation prompt |
@@ -320,6 +320,7 @@ poweradmin version
 | `-o table` | Human-readable aligned table, long content truncated (default) |
 | `-o full` | Human-readable aligned table, full content |
 | `-o json` | JSON output, suitable for scripting and piping into `jq` |
+| `-o yaml` | YAML output, suitable for piping into tools like `yq` |
 
 Color output is automatically enabled when stdout is a terminal and suppressed
 when piping or redirecting output.
