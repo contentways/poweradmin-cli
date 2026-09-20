@@ -15,6 +15,7 @@ poweradmin groups create [flags]
 ```
       --description string     Group description
   -h, --help                   help for create
+  -i, --interactive            Prompt interactively for missing values (feature preview)
       --name string            Group name (required)
   -o, --output string          Output format. One of: table|json|yaml (default "table")
       --perm-template-id int   Permission template ID

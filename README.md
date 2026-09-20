@@ -120,6 +120,21 @@ source ~/.bash_completion.d/poweradmin
 | `--quiet` | `-q` | Only print ID (create) or suppress output (delete) |
 | `--yes` | `-y` | Skip delete confirmation prompt |
 
+### Interactive Mode
+
+> **Feature preview:** Interactive mode is new and its prompts/flow may
+> change in a future release. Feedback is welcome.
+
+The `create` commands for zones, users, groups, permission templates and
+records support an `--interactive` (`-i`) flag. When set, any required
+value not already supplied via flag or argument is prompted for
+interactively, followed by a summary and confirmation before the resource
+is created.
+
+```bash
+poweradmin zones create --interactive
+```
+
 ### Zones
 
 ```bash
@@ -140,6 +155,9 @@ poweradmin zones get --id 42 -o json
 poweradmin zones create example.com
 poweradmin zones create example.com \
   --nameserver ns1.example.com,ns2.example.com,ns3.example.com
+
+# Create a zone interactively
+poweradmin zones create --interactive
 
 # Create and capture the ID
 ZONE_ID=$(poweradmin zones create example.com -q)
@@ -232,6 +250,9 @@ poweradmin users create \
   --email patrick@example.com \
   --fullname "Patrick Omland"
 
+# Create a user interactively
+poweradmin users create --interactive
+
 # Create a user with password via flag (not recommended)
 poweradmin users create \
   --username patrick \
@@ -264,6 +285,9 @@ poweradmin groups get --id 1
 poweradmin groups create --name "Zone Editors" --description "Can edit zone records"
 GROUP_ID=$(poweradmin groups create --name "Zone Editors" -q)
 
+# Create a group interactively
+poweradmin groups create --interactive
+
 # Update a group
 poweradmin groups update --name "Zone Editors" --new-name "DNS Editors"
 
@@ -295,6 +319,9 @@ poweradmin permission-templates get --id 1 -o json
 # Create a template
 poweradmin permission-templates create --name "Zone Editors" --description "Can edit zone records"
 poweradmin permission-templates create --name "Zone Editors" --type group --permissions 1,2,3
+
+# Create a template interactively
+poweradmin permission-templates create --interactive
 
 # Create and capture the ID
 PT_ID=$(poweradmin permission-templates create --name "Zone Editors" -q)
