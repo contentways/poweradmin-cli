@@ -1,0 +1,29 @@
+# .github/workflows/docs-check.yml
+name: Docs Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Generate docs
+        run: go run ./scripts/docs.go
+
+      - name: Check for uncommitted changes
+        run: |
+          if [ -n "$(git status --porcelain docs/reference)" ]; then
+            echo "::error::Die CLI-Referenzdokumentation ist nicht aktuell."
+            echo "Bitte lokal ausführen: go run ./scripts/docs.go"
+            echo "und die Änderungen committen."
+            git diff docs/reference
+            exit 1
+          fi
