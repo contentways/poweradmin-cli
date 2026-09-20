@@ -7,13 +7,14 @@ Create a DNS zone
 Create a new DNS zone in Poweradmin.
 
 ```
-poweradmin zones create <name> [flags]
+poweradmin zones create [name] [flags]
 ```
 
 ### Options
 
 ```
   -h, --help                 help for create
+  -i, --interactive          Prompt interactively for missing values
       --nameserver strings   Nameserver to add (comma-separated or multiple flags)
   -o, --output string        Output format. One of: table|json|yaml (default "table")
   -q, --quiet                Only print the ID of the created zone

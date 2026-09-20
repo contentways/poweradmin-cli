@@ -94,3 +94,19 @@ func PromptStringSlice(title, description string) ([]string, error) {
 	}
 	return result, nil
 }
+
+// PromptBool interactively asks the user a yes/no question.
+// defaultValue pre-selects the corresponding option.
+func PromptBool(title string, defaultValue bool) (bool, error) {
+	value := defaultValue
+	field := huh.NewConfirm().
+		Title(title).
+		Affirmative("Yes").
+		Negative("No").
+		Value(&value)
+
+	if err := huh.NewForm(huh.NewGroup(field)).Run(); err != nil {
+		return false, fmt.Errorf("prompt aborted: %w", err)
+	}
+	return value, nil
+}

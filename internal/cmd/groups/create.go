@@ -21,9 +21,44 @@ func NewCreateCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s := state.FromContext(cmd.Context())
 
+			interactive, _ := cmd.Flags().GetBool("interactive")
+
 			name, _ := cmd.Flags().GetString("name")
 			description, _ := cmd.Flags().GetString("description")
 			permTemplID, _ := cmd.Flags().GetInt("perm-template-id")
+
+			if interactive {
+				var err error
+
+				if name == "" {
+					name, err = base.PromptString("Group name", "", true)
+					if err != nil {
+						return err
+					}
+				}
+
+				if !cmd.Flags().Changed("description") {
+					description, err = base.PromptString("Description", "optional", false)
+					if err != nil {
+						return err
+					}
+				}
+
+				if !cmd.Flags().Changed("perm-template-id") {
+					permTemplID, err = base.PromptInt("Permission template ID", "optional, 0 = none", permTemplID)
+					if err != nil {
+						return err
+					}
+				}
+
+				summary := fmt.Sprintf(
+					"Create group:\n  Name:               %s\n  Description:        %s\n  Perm. template ID:  %d\n\nProceed? [y/N] ",
+					name, description, permTemplID,
+				)
+				if !base.Confirm(cmd, summary) {
+					return nil
+				}
+			}
 
 			if name == "" {
 				return fmt.Errorf("--name is required")
@@ -68,5 +103,6 @@ func NewCreateCmd() *cobra.Command {
 	cmd.Flags().Int("perm-template-id", 0, "Permission template ID")
 	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("quiet", "q", false, "Only print the ID of the created group")
+	cmd.Flags().BoolP("interactive", "i", false, "Prompt interactively for missing values")
 	return cmd
 }

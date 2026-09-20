@@ -23,10 +23,51 @@ func NewCreateCmd(s *state.State) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s := state.FromContext(cmd.Context())
 
+			interactive, _ := cmd.Flags().GetBool("interactive")
+
 			name, _ := cmd.Flags().GetString("name")
 			descr, _ := cmd.Flags().GetString("description")
 			tmplType, _ := cmd.Flags().GetString("type")
 			permsStr, _ := cmd.Flags().GetStringSlice("permissions")
+
+			if interactive {
+				var err error
+
+				if name == "" {
+					name, err = base.PromptString("Template name", "", true)
+					if err != nil {
+						return err
+					}
+				}
+
+				if !cmd.Flags().Changed("description") {
+					descr, err = base.PromptString("Description", "optional", false)
+					if err != nil {
+						return err
+					}
+				}
+
+				if !cmd.Flags().Changed("type") {
+					tmplType, err = base.PromptSelect(
+						"Template type",
+						[]string{"user", "group"},
+						tmplType,
+					)
+					if err != nil {
+						return err
+					}
+				}
+
+				if !cmd.Flags().Changed("permissions") {
+					permsStr, err = base.PromptStringSlice(
+						"Permission IDs",
+						"Comma-separated, e.g. 1,2,3 (optional)",
+					)
+					if err != nil {
+						return err
+					}
+				}
+			}
 
 			if name == "" {
 				return fmt.Errorf("--name is required")
@@ -44,6 +85,16 @@ func NewCreateCmd(s *state.State) *cobra.Command {
 					return fmt.Errorf("invalid permission ID %q: %w", p, err)
 				}
 				permissions = append(permissions, id)
+			}
+
+			if interactive {
+				summary := fmt.Sprintf(
+					"Create permission template:\n  Name:         %s\n  Description:  %s\n  Type:         %s\n  Permissions:  %v\n\nProceed? [y/N] ",
+					name, descr, tmplType, permissions,
+				)
+				if !base.Confirm(cmd, summary) {
+					return nil
+				}
 			}
 
 			client, err := s.Client()
@@ -84,5 +135,6 @@ func NewCreateCmd(s *state.State) *cobra.Command {
 	cmd.Flags().StringSlice("permissions", []string{}, "Permission IDs to assign (comma-separated or multiple flags)")
 	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("quiet", "q", false, "Only print the ID of the created template")
+	cmd.Flags().BoolP("interactive", "i", false, "Prompt interactively for missing values")
 	return cmd
 }
