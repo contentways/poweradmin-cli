@@ -15,7 +15,7 @@ poweradmin permission-templates create [flags]
 ```
       --description string    Template description
   -h, --help                  help for create
-  -i, --interactive           Prompt interactively for missing values
+  -i, --interactive           Prompt interactively for missing values (feature preview)
       --name string           Template name (required)
   -o, --output string         Output format. One of: table|json|yaml (default "table")
       --permissions strings   Permission IDs to assign (comma-separated or multiple flags)

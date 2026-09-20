@@ -14,7 +14,7 @@ poweradmin zones create [name] [flags]
 
 ```
   -h, --help                 help for create
-  -i, --interactive          Prompt interactively for missing values
+  -i, --interactive          Prompt interactively for missing values (feature preview)
       --nameserver strings   Nameserver to add (comma-separated or multiple flags)
   -o, --output string        Output format. One of: table|json|yaml (default "table")
   -q, --quiet                Only print the ID of the created zone

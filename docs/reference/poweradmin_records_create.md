@@ -15,7 +15,7 @@ poweradmin records create [flags]
 ```
       --content string     Record content (e.g. 1.2.3.4 for A records)
   -h, --help               help for create
-  -i, --interactive        Prompt interactively for missing values
+  -i, --interactive        Prompt interactively for missing values (feature preview)
       --name string        Record name (e.g. www.example.com)
   -o, --output string      Output format. One of: table|json|yaml (default "table")
       --priority int       Record priority, used for MX records (default: 0)

@@ -17,7 +17,7 @@ poweradmin users create [flags]
       --email string      Email address (required)
       --fullname string   Full name
   -h, --help              help for create
-  -i, --interactive       Prompt interactively for missing values
+  -i, --interactive       Prompt interactively for missing values (feature preview)
   -o, --output string     Output format. One of: table|json|yaml (default "table")
       --password string   Password (prompted if not provided)
   -q, --quiet             Only print the ID of the created user
