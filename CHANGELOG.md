@@ -1,5 +1,17 @@
 # Changelog
 
+## [v3.2.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.2.0)
+
+### Features
+
+- add --interactive flag to zones create
+- add --interactive flag to zones/users/groups/permission-templates create
+- mark --interactive as feature preview
+
+### Bug Fixes
+
+- set zone-name flag from interactive prompt in records create
+
 ## [v3.1.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.1.0)
 
 ### Features
