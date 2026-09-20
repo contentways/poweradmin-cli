@@ -135,6 +135,6 @@ func NewCreateCmd(s *state.State) *cobra.Command {
 	cmd.Flags().StringSlice("permissions", []string{}, "Permission IDs to assign (comma-separated or multiple flags)")
 	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("quiet", "q", false, "Only print the ID of the created template")
-	cmd.Flags().BoolP("interactive", "i", false, "Prompt interactively for missing values")
+	cmd.Flags().BoolP("interactive", "i", false, "Prompt interactively for missing values (feature preview)")
 	return cmd
 }

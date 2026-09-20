@@ -138,6 +138,6 @@ func NewCreateCmd() *cobra.Command {
 	cmd.Flags().Int("ttl", 3600, "TTL for the created NS records")
 	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("quiet", "q", false, "Only print the ID of the created zone")
-	cmd.Flags().BoolP("interactive", "i", false, "Prompt interactively for missing values")
+	cmd.Flags().BoolP("interactive", "i", false, "Prompt interactively for missing values (feature preview)")
 	return cmd
 }

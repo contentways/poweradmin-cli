@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
+	"github.com/spf13/cobra"
 )
 
 // PromptString interactively asks the user for a single string value.
@@ -109,4 +110,10 @@ func PromptBool(title string, defaultValue bool) (bool, error) {
 		return false, fmt.Errorf("prompt aborted: %w", err)
 	}
 	return value, nil
+}
+
+// PrintPreviewNotice writes a short notice to stderr indicating that
+// --interactive is a feature preview and its behavior may change.
+func PrintPreviewNotice(cmd *cobra.Command) {
+	fmt.Fprintln(cmd.ErrOrStderr(), "⚠ --interactive is a feature preview and may change in a future release.")
 }

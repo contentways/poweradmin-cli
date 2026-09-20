@@ -151,6 +151,6 @@ func NewCreateCmd() *cobra.Command {
 	cmd.Flags().Bool("active", true, "Whether the user is active (default: true)")
 	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("quiet", "q", false, "Only print the ID of the created user")
-	cmd.Flags().BoolP("interactive", "i", false, "Prompt interactively for missing values")
+	cmd.Flags().BoolP("interactive", "i", false, "Prompt interactively for missing values (feature preview)")
 	return cmd
 }

@@ -122,10 +122,14 @@ source ~/.bash_completion.d/poweradmin
 
 ### Interactive Mode
 
-The `create` commands for zones, users, groups and permission templates support
-an `--interactive` (`-i`) flag. When set, any required value not already
-supplied via flag or argument is prompted for interactively, followed by a
-summary and confirmation before the resource is created.
+> **Feature preview:** Interactive mode is new and its prompts/flow may
+> change in a future release. Feedback is welcome.
+
+The `create` commands for zones, users, groups, permission templates and
+records support an `--interactive` (`-i`) flag. When set, any required
+value not already supplied via flag or argument is prompted for
+interactively, followed by a summary and confirmation before the resource
+is created.
 
 ```bash
 poweradmin zones create --interactive
