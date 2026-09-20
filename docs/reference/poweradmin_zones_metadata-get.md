@@ -1,24 +1,23 @@
-## poweradmin zones delete
+## poweradmin zones metadata-get
 
-Delete a DNS zone
+Get zone metadata by kind
 
 ### Synopsis
 
-Delete a DNS zone from Poweradmin by name or ID.
+Get the values stored under a specific metadata kind (e.g. ALLOW-AXFR-FROM) for a Poweradmin zone.
 
 ```
-poweradmin zones delete [flags]
+poweradmin zones metadata-get [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for delete
+  -h, --help            help for metadata-get
       --id string       Zone ID
+      --kind string     Metadata kind (e.g. ALLOW-AXFR-FROM) (required)
       --name string     Zone name (e.g. example.com)
   -o, --output string   Output format. One of: table|json|yaml (default "table")
-  -q, --quiet           Suppress output after deletion
-  -y, --yes             Skip confirmation prompt
 ```
 
 ### Options inherited from parent commands

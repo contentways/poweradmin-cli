@@ -1,22 +1,21 @@
-## poweradmin zones get
+## poweradmin zones export
 
-Get a DNS zone by name or ID
+Export a DNS zone in BIND format
 
 ### Synopsis
 
-Get a DNS zone by name or ID from Poweradmin.
+Export a DNS zone as a BIND-compatible zone file to stdout.
 
 ```
-poweradmin zones get [flags]
+poweradmin zones export [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for get
-      --id string       Zone ID
-      --name string     Zone name (e.g. example.com)
-  -o, --output string   Output format. One of: table|json|yaml (default "table")
+  -h, --help          help for export
+      --id string     Zone ID
+      --name string   Zone name (e.g. example.com)
 ```
 
 ### Options inherited from parent commands
