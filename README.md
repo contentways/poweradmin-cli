@@ -1,5 +1,8 @@
 # poweradmin-cli
 
+[![CI](https://github.com/contentways/poweradmin-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/contentways/poweradmin-cli/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/contentways/poweradmin-cli/branch/main/graph/badge.svg)](https://codecov.io/gh/contentways/poweradmin-cli)
+
 A command-line interface for managing DNS zones, records, users and groups via the [Poweradmin](https://www.poweradmin.org) REST API.
 
 Built with [poweradmin-go](https://github.com/contentways/poweradmin-go) — the Go SDK for Poweradmin.
