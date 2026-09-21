@@ -1,5 +1,14 @@
 # Changelog
 
+## [v3.3.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.3.0)
+
+### Features
+
+- add --interactive multi-select to zones delete
+- add --interactive multi-select to delete commands
+- add --verbose flag for HTTP request/response debug logging
+- add --verbose flag for HTTP request/response debug logging
+
 ## [v3.2.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.2.0)
 
 ### Features
