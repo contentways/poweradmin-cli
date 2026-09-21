@@ -135,6 +135,16 @@ is created.
 poweradmin zones create --interactive
 ```
 
+The `delete` commands support `--interactive` as well, but with a
+different flow: instead of prompting for identifying flags, all
+resources are listed and you pick zero or more via a multi-select
+(arrow keys to navigate, space to toggle, enter to confirm), followed
+by a summary and confirmation before deletion.
+
+```bash
+poweradmin zones delete --interactive
+```
+
 ### Zones
 
 ```bash
@@ -165,6 +175,9 @@ ZONE_ID=$(poweradmin zones create example.com -q)
 # Delete a zone
 poweradmin zones delete --name example.com
 poweradmin zones delete --name example.com --yes
+
+# Delete zones interactively (multi-select)
+poweradmin zones delete --interactive
 
 # Export a zone as BIND zone file
 poweradmin zones export --name example.com
@@ -212,6 +225,9 @@ poweradmin records create \
   --content 1.2.3.4 \
   --ttl 3600
 
+# Create a record interactively
+poweradmin records create --interactive
+
 # Create and capture the ID
 RECORD_ID=$(poweradmin records create \
   --zone-name example.com \
@@ -229,6 +245,9 @@ poweradmin records update \
 poweradmin records delete \
   --zone-name example.com \
   --id <record-id> --yes
+
+# Delete records interactively (pick a zone, then multi-select records)
+poweradmin records delete --interactive
 ```
 
 ### Users
@@ -266,6 +285,9 @@ poweradmin users update --id 1 --active=false
 # Delete a user
 poweradmin users delete --name patrick --yes
 
+# Delete users interactively (multi-select)
+poweradmin users delete --interactive
+
 # Assign a permission template
 poweradmin users set-permission-template --name patrick --template-id 2
 ```
@@ -293,6 +315,9 @@ poweradmin groups update --name "Zone Editors" --new-name "DNS Editors"
 
 # Delete a group
 poweradmin groups delete --name "DNS Editors" --yes
+
+# Delete groups interactively (multi-select)
+poweradmin groups delete --interactive
 
 # Manage members
 poweradmin groups members --name Administrators
@@ -332,6 +357,9 @@ poweradmin permission-templates update --name "Zone Editors" --permissions 1,2,3
 
 # Delete a template
 poweradmin permission-templates delete --name "Zone Editors" --yes
+
+# Delete templates interactively (multi-select)
+poweradmin permission-templates delete --interactive
 ```
 
 ### Version
