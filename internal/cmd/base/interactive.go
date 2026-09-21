@@ -117,3 +117,18 @@ func PromptBool(title string, defaultValue bool) (bool, error) {
 func PrintPreviewNotice(cmd *cobra.Command) {
 	fmt.Fprintln(cmd.ErrOrStderr(), "⚠ --interactive is a feature preview and may change in a future release.")
 }
+
+// PromptMultiSelect interactively asks the user to choose zero or more of
+// options using arrow keys and space to toggle selection.
+func PromptMultiSelect(title string, options []string) ([]string, error) {
+	var selected []string
+	field := huh.NewMultiSelect[string]().
+		Title(title).
+		Options(huh.NewOptions(options...)...).
+		Value(&selected)
+
+	if err := huh.NewForm(huh.NewGroup(field)).Run(); err != nil {
+		return nil, fmt.Errorf("prompt aborted: %w", err)
+	}
+	return selected, nil
+}
