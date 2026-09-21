@@ -119,6 +119,24 @@ source ~/.bash_completion.d/poweradmin
 | `--no-header` | | Suppress table header row |
 | `--quiet` | `-q` | Only print ID (create) or suppress output (delete) |
 | `--yes` | `-y` | Skip delete confirmation prompt |
+| `--verbose` | `-v` | Log HTTP requests/responses to stderr for debugging |
+
+### Verbose Mode
+
+The `--verbose` (`-v`) flag logs each HTTP request to stderr — method,
+path, status code, and duration — useful for debugging connection issues
+or unexpected API responses without affecting stdout, so it's safe to
+combine with scripting and piping.
+
+```bash
+poweradmin --verbose zones list
+```
+
+```
+[poweradmin] GET zones?page=1&per_page=100 -> 200 (126ms)
+ID    NAME                 TYPE
+...
+```
 
 ### Interactive Mode
 
