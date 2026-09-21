@@ -3,11 +3,13 @@
 package users
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/contentways/poweradmin-cli/v3/internal/cmd/base"
 	"github.com/contentways/poweradmin-cli/v3/internal/output"
 	"github.com/contentways/poweradmin-cli/v3/internal/state"
+	"github.com/contentways/poweradmin-go/v3/poweradmin"
 	"github.com/spf13/cobra"
 )
 
@@ -20,16 +22,23 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s := state.FromContext(cmd.Context())
 
+			interactive, _ := cmd.Flags().GetBool("interactive")
+
+			client, err := s.Client()
+			if err != nil {
+				return fmt.Errorf("failed to create client: %w", err)
+			}
+
+			if interactive {
+				base.PrintPreviewNotice(cmd)
+				return runInteractiveDelete(cmd, client)
+			}
+
 			name, _ := cmd.Flags().GetString("name")
 			idStr, _ := cmd.Flags().GetString("id")
 
 			if name == "" && idStr == "" {
 				return fmt.Errorf("either --name or --id is required")
-			}
-
-			client, err := s.Client()
-			if err != nil {
-				return fmt.Errorf("failed to create client: %w", err)
 			}
 
 			user, err := base.ResolveUser(cmd, client)
@@ -70,7 +79,65 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("yes", "y", false, "Skip confirmation prompt")
 	cmd.Flags().BoolP("quiet", "q", false, "Suppress output after deletion")
+	cmd.Flags().BoolP("interactive", "i", false, "Interactively select users to delete (feature preview)")
 	// Register shell completion for --name flag.
-	cmd.RegisterFlagCompletionFunc("name", base.ZoneNameCompletion(s))
+	cmd.RegisterFlagCompletionFunc("name", base.UserNameCompletion(s))
 	return cmd
+}
+
+// runInteractiveDelete lists all users, lets the user pick zero or more via
+// a multi-select prompt, confirms, and deletes each selected user. Failures
+// on individual users do not stop the remaining deletions; all errors are
+// collected and returned together at the end.
+func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
+	users, err := client.User.All(cmd.Context())
+	if err != nil {
+		return fmt.Errorf("failed to list users: %w", err)
+	}
+	if len(users) == 0 {
+		fmt.Fprintln(cmd.OutOrStdout(), "no users found")
+		return nil
+	}
+
+	labels := make([]string, len(users))
+	byLabel := make(map[string]*poweradmin.User, len(users))
+	for i, u := range users {
+		label := fmt.Sprintf("%s (id %d)", u.Username, u.ID)
+		labels[i] = label
+		byLabel[label] = u
+	}
+
+	selected, err := base.PromptMultiSelect("Select users to delete", labels)
+	if err != nil {
+		return err
+	}
+	if len(selected) == 0 {
+		fmt.Fprintln(cmd.OutOrStdout(), "no users selected, nothing to do")
+		return nil
+	}
+
+	summary := fmt.Sprintf("The following %d user(s) will be deleted:\n", len(selected))
+	for _, label := range selected {
+		summary += fmt.Sprintf("  - %s\n", label)
+	}
+	summary += "\nProceed? [y/N] "
+	if !base.Confirm(cmd, summary) {
+		return nil
+	}
+
+	var errs []error
+	for _, label := range selected {
+		u := byLabel[label]
+		if _, err := client.User.Delete(cmd.Context(), u.ID); err != nil {
+			fmt.Fprintf(cmd.OutOrStdout(), "failed to delete user %s (id %d): %s\n", u.Username, u.ID, err)
+			errs = append(errs, fmt.Errorf("user %s: %w", u.Username, err))
+			continue
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "deleted user %s (id %d)\n", u.Username, u.ID)
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to delete %d of %d user(s): %w", len(errs), len(selected), errors.Join(errs...))
+	}
+	return nil
 }

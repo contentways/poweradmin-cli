@@ -3,12 +3,14 @@
 package permission_templates
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/contentways/poweradmin-cli/v3/internal/cmd/base"
 	"github.com/contentways/poweradmin-cli/v3/internal/output"
 	"github.com/contentways/poweradmin-cli/v3/internal/state"
+	"github.com/contentways/poweradmin-go/v3/poweradmin"
 	"github.com/spf13/cobra"
 )
 
@@ -21,16 +23,23 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s := state.FromContext(cmd.Context())
 
+			interactive, _ := cmd.Flags().GetBool("interactive")
+
+			client, err := s.Client()
+			if err != nil {
+				return fmt.Errorf("failed to create client: %w", err)
+			}
+
+			if interactive {
+				base.PrintPreviewNotice(cmd)
+				return runInteractiveDelete(cmd, client)
+			}
+
 			name, _ := cmd.Flags().GetString("name")
 			idStr, _ := cmd.Flags().GetString("id")
 
 			if name == "" && idStr == "" {
 				return fmt.Errorf("either --name or --id is required")
-			}
-
-			client, err := s.Client()
-			if err != nil {
-				return fmt.Errorf("failed to create client: %w", err)
 			}
 
 			var tmplID int
@@ -85,6 +94,65 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("yes", "y", false, "Skip confirmation prompt")
 	cmd.Flags().BoolP("quiet", "q", false, "Suppress output after deletion")
+	cmd.Flags().BoolP("interactive", "i", false, "Interactively select templates to delete (feature preview)")
 	cmd.RegisterFlagCompletionFunc("name", base.PermissionTemplateNameCompletion(s))
 	return cmd
+}
+
+// runInteractiveDelete lists all permission templates, lets the user pick
+// zero or more via a multi-select prompt, confirms, and deletes each
+// selected template. Failures on individual templates do not stop the
+// remaining deletions; all errors are collected and returned together at
+// the end.
+func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
+	templates, _, err := client.PermissionTemplate.List(cmd.Context())
+	if err != nil {
+		return fmt.Errorf("failed to list permission templates: %w", err)
+	}
+	if len(templates) == 0 {
+		fmt.Fprintln(cmd.OutOrStdout(), "no permission templates found")
+		return nil
+	}
+
+	labels := make([]string, len(templates))
+	byLabel := make(map[string]*poweradmin.PermissionTemplate, len(templates))
+	for i, t := range templates {
+		label := fmt.Sprintf("%s (id %d)", t.Name, t.ID)
+		labels[i] = label
+		byLabel[label] = t
+	}
+
+	selected, err := base.PromptMultiSelect("Select permission templates to delete", labels)
+	if err != nil {
+		return err
+	}
+	if len(selected) == 0 {
+		fmt.Fprintln(cmd.OutOrStdout(), "no permission templates selected, nothing to do")
+		return nil
+	}
+
+	summary := fmt.Sprintf("The following %d permission template(s) will be deleted:\n", len(selected))
+	for _, label := range selected {
+		summary += fmt.Sprintf("  - %s\n", label)
+	}
+	summary += "\nProceed? [y/N] "
+	if !base.Confirm(cmd, summary) {
+		return nil
+	}
+
+	var errs []error
+	for _, label := range selected {
+		t := byLabel[label]
+		if _, err := client.PermissionTemplate.Delete(cmd.Context(), t.ID); err != nil {
+			fmt.Fprintf(cmd.OutOrStdout(), "failed to delete permission template %s (id %d): %s\n", t.Name, t.ID, err)
+			errs = append(errs, fmt.Errorf("template %s: %w", t.Name, err))
+			continue
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "deleted permission template %s (id %d)\n", t.Name, t.ID)
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to delete %d of %d permission template(s): %w", len(errs), len(selected), errors.Join(errs...))
+	}
+	return nil
 }
