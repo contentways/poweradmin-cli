@@ -88,3 +88,40 @@ func TestUsersDeleteError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestUsersDeleteByID(t *testing.T) {
+	mockUser := &testutil.MockUserClient{
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.User, *poweradmin.Response, error) {
+			return &poweradmin.User{ID: id, Username: "max"}, nil, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+
+	err := fx.Run(users.NewDeleteCmd(nil), []string{"--id", "42", "--yes"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestUsersDeleteQuiet(t *testing.T) {
+	mockUser := &testutil.MockUserClient{
+		GetByNameFn: func(ctx context.Context, username string) (*poweradmin.User, *poweradmin.Response, error) {
+			return &poweradmin.User{ID: 42, Username: username}, nil, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+
+	err := fx.Run(users.NewDeleteCmd(nil), []string{"--name", "max", "--yes", "--quiet"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if fx.Stdout.String() != "" {
+		t.Errorf("expected no output in quiet mode, got:\n%s", fx.Stdout.String())
+	}
+}

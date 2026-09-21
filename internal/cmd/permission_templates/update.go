@@ -55,6 +55,9 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("failed to get permission template: %w", err)
 			}
+			if current == nil {
+				return fmt.Errorf("permission template id %d not found", tmplID)
+			}
 
 			opts := poweradmin.PermissionTemplateOpts{
 				Name:         current.Name,

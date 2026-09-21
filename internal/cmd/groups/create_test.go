@@ -135,3 +135,55 @@ func TestGroupsCreateInteractiveDeclineAbortsWithoutCreating(t *testing.T) {
 		t.Error("expected group NOT to be created after declining confirmation")
 	}
 }
+
+func TestGroupsCreateQuiet(t *testing.T) {
+	mockGroup := &testutil.MockGroupClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.GroupCreateOpts) (int, *poweradmin.Response, error) {
+			return 42, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	err := fx.Run(groups.NewCreateCmd(), []string{"--name", "TestGroup", "-q"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	out := strings.TrimSpace(fx.Stdout.String())
+	if out != "42" {
+		t.Errorf("expected quiet output to be just the id, got: %q", out)
+	}
+}
+
+// TestGroupsCreateInteractiveFullFlow drives every prompt in
+// "groups create --interactive" via huh's accessible mode.
+func TestGroupsCreateInteractiveFullFlow(t *testing.T) {
+	testutil.WithAccessiblePrompts(t)
+
+	var createdName, createdDescription string
+	var createdPermTemplID int
+	mockGroup := &testutil.MockGroupClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.GroupCreateOpts) (int, *poweradmin.Response, error) {
+			createdName = opts.Name
+			createdDescription = opts.Description
+			createdPermTemplID = opts.PermTemplID
+			return 42, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+
+	// name, description, perm-template-id, then the final confirmation.
+	testutil.WithDelayedStdin(t, "TestGroup\n", "A test group\n", "3\n", "y\n")
+
+	err := fx.Run(groups.NewCreateCmd(), []string{"--interactive"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if createdName != "TestGroup" {
+		t.Errorf("expected name TestGroup, got %q", createdName)
+	}
+	if createdDescription != "A test group" {
+		t.Errorf("expected description 'A test group', got %q", createdDescription)
+	}
+	if createdPermTemplID != 3 {
+		t.Errorf("expected perm-template-id 3, got %d", createdPermTemplID)
+	}
+}

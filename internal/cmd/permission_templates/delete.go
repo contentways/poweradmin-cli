@@ -57,6 +57,9 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("failed to resolve permission template: %w", err)
 				}
+				if t == nil {
+					return fmt.Errorf("permission template %q not found", name)
+				}
 				tmplID = t.ID
 				tmplName = t.Name
 			}

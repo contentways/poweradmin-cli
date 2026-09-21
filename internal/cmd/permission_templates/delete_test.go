@@ -71,3 +71,51 @@ func TestPermissionTemplatesDeleteError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestPermissionTemplatesDeleteByID(t *testing.T) {
+	mock := &testutil.MockPermissionTemplateClient{
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return &poweradmin.PermissionTemplate{ID: id, Name: "MyTemplate"}, nil, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	err := fx.Run(permission_templates.NewDeleteCmd(nil), []string{"--id", "1", "--yes"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestPermissionTemplatesDeleteQuiet(t *testing.T) {
+	mock := &testutil.MockPermissionTemplateClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return &poweradmin.PermissionTemplate{ID: 1, Name: name}, nil, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	err := fx.Run(permission_templates.NewDeleteCmd(nil), []string{"--name", "MyTemplate", "--yes", "-q"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if fx.Stdout.String() != "" {
+		t.Errorf("expected no output in quiet mode, got:\n%s", fx.Stdout.String())
+	}
+}
+
+func TestPermissionTemplatesDeleteNilWithoutError(t *testing.T) {
+	mock := &testutil.MockPermissionTemplateClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	err := fx.Run(permission_templates.NewDeleteCmd(nil), []string{"--name", "Ghost", "--yes"})
+	if err == nil {
+		t.Fatal("expected error for nil template with nil error, got nil")
+	}
+}

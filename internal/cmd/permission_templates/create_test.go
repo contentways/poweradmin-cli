@@ -140,3 +140,60 @@ func TestPermissionTemplatesCreateInteractiveDeclineAbortsWithoutCreating(t *tes
 		t.Error("expected template NOT to be created after declining confirmation")
 	}
 }
+
+func TestPermissionTemplatesCreateQuiet(t *testing.T) {
+	mock := &testutil.MockPermissionTemplateClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.PermissionTemplateOpts) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return &poweradmin.PermissionTemplate{ID: 1, Name: opts.Name}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	err := fx.Run(permission_templates.NewCreateCmd(nil), []string{"--name", "MyTemplate", "-q"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	out := strings.TrimSpace(fx.Stdout.String())
+	if out != "1" {
+		t.Errorf("expected quiet output to be just the id, got: %q", out)
+	}
+}
+
+// TestPermissionTemplatesCreateInteractiveFullFlow drives every prompt in
+// "permission-templates create --interactive" via huh's accessible mode.
+func TestPermissionTemplatesCreateInteractiveFullFlow(t *testing.T) {
+	testutil.WithAccessiblePrompts(t)
+
+	var createdName, createdDescr, createdType string
+	var createdPerms []int
+	mock := &testutil.MockPermissionTemplateClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.PermissionTemplateOpts) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			createdName = opts.Name
+			createdDescr = opts.Descr
+			createdType = opts.TemplateType
+			createdPerms = opts.Permissions
+			return &poweradmin.PermissionTemplate{ID: 1, Name: opts.Name}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+
+	// name, description, type (1 = user, skips nothing since both options
+	// are shown), permissions, then the final confirmation.
+	testutil.WithDelayedStdin(t, "MyTemplate\n", "Can edit zones\n", "1\n", "1,2,3\n", "y\n")
+
+	err := fx.Run(permission_templates.NewCreateCmd(nil), []string{"--interactive"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if createdName != "MyTemplate" {
+		t.Errorf("expected name MyTemplate, got %q", createdName)
+	}
+	if createdDescr != "Can edit zones" {
+		t.Errorf("expected description 'Can edit zones', got %q", createdDescr)
+	}
+	if createdType != "user" {
+		t.Errorf("expected type user, got %q", createdType)
+	}
+	if len(createdPerms) != 3 {
+		t.Errorf("expected 3 permissions, got %v", createdPerms)
+	}
+}

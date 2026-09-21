@@ -76,3 +76,19 @@ func TestGroupsUpdateError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestGroupsUpdateByID(t *testing.T) {
+	mockGroup := &testutil.MockGroupClient{
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.Group, *poweradmin.Response, error) {
+			return &poweradmin.Group{ID: id, Name: "TestGroup"}, nil, nil
+		},
+		UpdateFn: func(ctx context.Context, id int, opts poweradmin.GroupUpdateOpts) (*poweradmin.Group, *poweradmin.Response, error) {
+			return &poweradmin.Group{ID: id, Name: "NewName"}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	err := fx.Run(groups.NewUpdateCmd(nil), []string{"--id", "42", "--new-name", "NewName"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
