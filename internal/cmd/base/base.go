@@ -101,12 +101,18 @@ func ResolveZone(cmd *cobra.Command, client *poweradmin.Client) (*poweradmin.Zon
 		if err != nil {
 			return nil, fmt.Errorf("failed to get zone: %w", err)
 		}
+		if zone == nil {
+			return nil, fmt.Errorf("zone id %d not found", id)
+		}
 		return zone, nil
 	}
 
 	zone, _, err := client.Zone.GetByName(cmd.Context(), name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve zone: %w", err)
+	}
+	if zone == nil {
+		return nil, fmt.Errorf("zone %q not found", name)
 	}
 	return zone, nil
 }
@@ -125,12 +131,18 @@ func ResolveUser(cmd *cobra.Command, client *poweradmin.Client) (*poweradmin.Use
 		if err != nil {
 			return nil, fmt.Errorf("failed to get user: %w", err)
 		}
+		if user == nil {
+			return nil, fmt.Errorf("user id %d not found", id)
+		}
 		return user, nil
 	}
 
 	user, _, err := client.User.GetByName(cmd.Context(), name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve user: %w", err)
+	}
+	if user == nil {
+		return nil, fmt.Errorf("user %q not found", name)
 	}
 	return user, nil
 }
@@ -149,12 +161,18 @@ func ResolveGroup(cmd *cobra.Command, client *poweradmin.Client) (*poweradmin.Gr
 		if err != nil {
 			return nil, fmt.Errorf("failed to get group: %w", err)
 		}
+		if group == nil {
+			return nil, fmt.Errorf("group id %d not found", id)
+		}
 		return group, nil
 	}
 
 	group, _, err := client.Group.GetByName(cmd.Context(), name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve group: %w", err)
+	}
+	if group == nil {
+		return nil, fmt.Errorf("group %q not found", name)
 	}
 	return group, nil
 }
@@ -175,6 +193,9 @@ func ResolveZoneID(cmd *cobra.Command, client *poweradmin.Client) (int, error) {
 	zone, _, err := client.Zone.GetByName(cmd.Context(), zoneName)
 	if err != nil {
 		return 0, fmt.Errorf("failed to resolve zone: %w", err)
+	}
+	if zone == nil {
+		return 0, fmt.Errorf("zone %q not found", zoneName)
 	}
 	return zone.ID, nil
 }

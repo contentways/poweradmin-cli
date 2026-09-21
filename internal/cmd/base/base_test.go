@@ -712,3 +712,47 @@ func TestPermissionTemplateNameCompletionError(t *testing.T) {
 		t.Errorf("expected nil names on error, got: %v", names)
 	}
 }
+
+func TestResolveZoneNilWithoutError(t *testing.T) {
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, mockZone, nil)
+
+	cmd := &cobra.Command{Use: "test"}
+	cmd.Flags().String("name", "", "")
+	cmd.Flags().String("id", "", "")
+	if err := cmd.Flags().Set("name", "ghost.com"); err != nil {
+		t.Fatalf("failed to set name flag: %v", err)
+	}
+	cmd.SetContext(fx.State.WithContext(context.Background()))
+
+	_, err := base.ResolveZone(cmd, fx.State.MockClient)
+	if err == nil {
+		t.Fatal("expected error for nil zone with nil error, got nil")
+	}
+}
+
+func TestResolveZoneIDNilWithoutError(t *testing.T) {
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, mockZone, nil)
+
+	cmd := &cobra.Command{Use: "test"}
+	cmd.Flags().String("zone-name", "", "")
+	cmd.Flags().String("zone-id", "", "")
+	if err := cmd.Flags().Set("zone-name", "ghost.com"); err != nil {
+		t.Fatalf("failed to set zone-name flag: %v", err)
+	}
+	cmd.SetContext(fx.State.WithContext(context.Background()))
+
+	_, err := base.ResolveZoneID(cmd, fx.State.MockClient)
+	if err == nil {
+		t.Fatal("expected error for nil zone with nil error, got nil")
+	}
+}
