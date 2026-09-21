@@ -25,8 +25,24 @@ func init() {
 		return
 	}
 
-	if v := info.Main.Version; v != "" && v != "(devel)" {
+	v, c := detectFromBuildInfo(info)
+	if v != "" {
 		Version = v
+	}
+	if c != "" {
+		Commit = c
+	}
+}
+
+// detectFromBuildInfo extracts a version string and a short (7-character)
+// VCS revision from Go's embedded build info. Returns empty strings for
+// either value that could not be determined, leaving the caller's existing
+// default in place. Separated from init() so the detection logic itself can
+// be tested with a fabricated *debug.BuildInfo, since init() cannot be
+// re-triggered in tests.
+func detectFromBuildInfo(info *debug.BuildInfo) (v, commit string) {
+	if info.Main.Version != "" && info.Main.Version != "(devel)" {
+		v = info.Main.Version
 	}
 
 	for _, s := range info.Settings {
@@ -35,7 +51,9 @@ func init() {
 			if len(rev) > 7 {
 				rev = rev[:7]
 			}
-			Commit = rev
+			commit = rev
 		}
 	}
+
+	return v, commit
 }

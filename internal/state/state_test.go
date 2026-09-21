@@ -56,3 +56,40 @@ func TestClientWithMockClient(t *testing.T) {
 		t.Fatal("expected mock client")
 	}
 }
+
+func TestClientBuildsRealClientWithoutMock(t *testing.T) {
+	s := state.New("https://dns.example.com", "pwa_test")
+
+	client, err := s.Client()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if client == nil {
+		t.Fatal("expected a non-nil client")
+	}
+	if client == s.MockClient {
+		t.Error("expected a freshly built client, not the (nil) mock")
+	}
+}
+
+func TestClientVerboseEnablesDebugWriter(t *testing.T) {
+	s := state.New("https://dns.example.com", "pwa_test")
+	s.Verbose = true
+
+	client, err := s.Client()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if client == nil {
+		t.Fatal("expected a non-nil client")
+	}
+}
+
+func TestClientMissingURLReturnsError(t *testing.T) {
+	s := state.New("", "pwa_test")
+
+	_, err := s.Client()
+	if err == nil {
+		t.Fatal("expected error for missing URL, got nil")
+	}
+}

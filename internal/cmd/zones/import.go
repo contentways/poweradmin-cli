@@ -101,6 +101,9 @@ func NewImportCmd(s *state.State) *cobra.Command {
 				}
 				fmt.Fprintf(cmd.OutOrStdout(), "created zone %s (id %d)\n", zoneName, zoneID)
 			} else {
+				if zone == nil {
+					return fmt.Errorf("zone %q not found", zoneName)
+				}
 				zoneID = zone.ID
 			}
 
