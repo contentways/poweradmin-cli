@@ -101,3 +101,40 @@ func TestZonesDeleteNilWithoutError(t *testing.T) {
 		t.Fatal("expected error for nil zone with nil error, got nil")
 	}
 }
+
+// TestZonesDeleteInteractiveFullFlow drives the multi-select prompt for
+// "zones delete --interactive" end to end: listing zones, toggling one,
+// confirming the selection, then confirming deletion.
+func TestZonesDeleteInteractiveFullFlow(t *testing.T) {
+	testutil.WithAccessiblePrompts(t)
+
+	var deletedID int
+	mockZone := &testutil.MockZoneClient{
+		AllFn: func(ctx context.Context) ([]*poweradmin.Zone, error) {
+			return []*poweradmin.Zone{
+				{ID: 1, Name: "example.com"},
+				{ID: 2, Name: "other.com"},
+			}, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			deletedID = id
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, mockZone, nil)
+
+	// toggle zone 1 (example.com), 0 confirms the selection, then the
+	// final "Proceed?" confirmation.
+	testutil.WithDelayedStdin(t, "1\n", "0\n", "y\n")
+
+	err := fx.Run(zones.NewDeleteCmd(nil), []string{"--interactive"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if deletedID != 1 {
+		t.Errorf("expected zone id 1 to be deleted, got %d", deletedID)
+	}
+	if !strings.Contains(fx.Stdout.String(), "deleted zone example.com") {
+		t.Errorf("expected success output, got:\n%s", fx.Stdout.String())
+	}
+}
