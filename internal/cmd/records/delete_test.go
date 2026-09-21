@@ -101,3 +101,51 @@ func TestRecordsDeleteError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestRecordsDeleteByZoneID(t *testing.T) {
+	mockRecord := &testutil.MockRecordClient{
+		DeleteFn: func(ctx context.Context, zoneID int, recordID string) (*poweradmin.Response, error) {
+			if zoneID != 7 {
+				t.Errorf("expected zoneID 7, got %d", zoneID)
+			}
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, &testutil.MockZoneClient{}, mockRecord)
+
+	err := fx.Run(records.NewDeleteCmd(nil), []string{
+		"--zone-id", "7",
+		"--id", "rec-42",
+		"--yes",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestRecordsDeleteQuiet(t *testing.T) {
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return &poweradmin.Zone{ID: 1, Name: name}, nil, nil
+		},
+	}
+	mockRecord := &testutil.MockRecordClient{
+		DeleteFn: func(ctx context.Context, zoneID int, recordID string) (*poweradmin.Response, error) {
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, mockZone, mockRecord)
+
+	err := fx.Run(records.NewDeleteCmd(nil), []string{
+		"--zone-name", "example.com",
+		"--id", "rec-42",
+		"--yes",
+		"--quiet",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if fx.Stdout.String() != "" {
+		t.Errorf("expected no output in quiet mode, got:\n%s", fx.Stdout.String())
+	}
+}

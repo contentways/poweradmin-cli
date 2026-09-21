@@ -5,11 +5,32 @@ package base
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
 )
+
+// accessibleEnvVar, when set to a non-empty value, switches every prompt in
+// this package to huh's accessible mode: plain line-based stdin/stdout
+// prompts instead of the interactive TUI. This exists so tests can drive
+// prompts via piped stdin without a real terminal; it is not intended as a
+// user-facing accessibility toggle (unlike huh's own ACCESSIBLE convention,
+// this one is deliberately unadvertised to end users).
+const accessibleEnvVar = "POWERADMIN_TEST_ACCESSIBLE"
+
+// isAccessible reports whether prompts should run in huh's accessible mode.
+func isAccessible() bool {
+	return os.Getenv(accessibleEnvVar) != ""
+}
+
+// runForm runs a single-field huh form, honoring accessible mode.
+func runForm(field huh.Field) error {
+	return huh.NewForm(huh.NewGroup(field)).
+		WithAccessible(isAccessible()).
+		Run()
+}
 
 // PromptString interactively asks the user for a single string value.
 // If required is true, empty input is rejected.
@@ -23,14 +44,14 @@ func PromptString(title, description string, required bool) (string, error) {
 	if required {
 		field = field.Validate(func(s string) error {
 			if strings.TrimSpace(s) == "" {
-				return fmt.Errorf("darf nicht leer sein")
+				return fmt.Errorf("must not be empty")
 			}
 			return nil
 		})
 	}
 
-	if err := huh.NewForm(huh.NewGroup(field)).Run(); err != nil {
-		return "", fmt.Errorf("prompt abgebrochen: %w", err)
+	if err := runForm(field); err != nil {
+		return "", fmt.Errorf("prompt aborted: %w", err)
 	}
 	return value, nil
 }
@@ -44,8 +65,8 @@ func PromptSelect(title string, options []string, selected string) (string, erro
 		Options(huh.NewOptions(options...)...).
 		Value(&value)
 
-	if err := huh.NewForm(huh.NewGroup(field)).Run(); err != nil {
-		return "", fmt.Errorf("prompt abgebrochen: %w", err)
+	if err := runForm(field); err != nil {
+		return "", fmt.Errorf("prompt aborted: %w", err)
 	}
 	return value, nil
 }
@@ -61,13 +82,13 @@ func PromptInt(title, description string, defaultValue int) (int, error) {
 		Validate(func(s string) error {
 			var n int
 			if _, err := fmt.Sscanf(s, "%d", &n); err != nil {
-				return fmt.Errorf("muss eine Zahl sein")
+				return fmt.Errorf("must be a number")
 			}
 			return nil
 		})
 
-	if err := huh.NewForm(huh.NewGroup(field)).Run(); err != nil {
-		return 0, fmt.Errorf("prompt abgebrochen: %w", err)
+	if err := runForm(field); err != nil {
+		return 0, fmt.Errorf("prompt aborted: %w", err)
 	}
 
 	var n int
@@ -106,7 +127,7 @@ func PromptBool(title string, defaultValue bool) (bool, error) {
 		Negative("No").
 		Value(&value)
 
-	if err := huh.NewForm(huh.NewGroup(field)).Run(); err != nil {
+	if err := runForm(field); err != nil {
 		return false, fmt.Errorf("prompt aborted: %w", err)
 	}
 	return value, nil
@@ -127,7 +148,7 @@ func PromptMultiSelect(title string, options []string) ([]string, error) {
 		Options(huh.NewOptions(options...)...).
 		Value(&selected)
 
-	if err := huh.NewForm(huh.NewGroup(field)).Run(); err != nil {
+	if err := runForm(field); err != nil {
 		return nil, fmt.Errorf("prompt aborted: %w", err)
 	}
 	return selected, nil
