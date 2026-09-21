@@ -40,11 +40,21 @@ jobs:
       - name: Run tests
         run: go test -coverpkg=./internal/... -coverprofile=coverage.txt -v -race ./...
 
-      # - name: Upload coverage
-      #   uses: codecov/codecov-action@v4
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     flags: unit
+      - name: Print coverage summary
+        run: |
+          echo "## Coverage" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          go tool cover -func=coverage.txt | tail -1 >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.txt
+          flags: unit
+          fail_ci_if_error: false
+
 
   go-mod-tidy:
     runs-on: ubuntu-latest
