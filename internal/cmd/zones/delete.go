@@ -97,9 +97,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 }
 
 // runInteractiveDelete lists all zones, lets the user pick zero or more via
-// a multi-select prompt, confirms, and deletes each selected zone. Failures
-// on individual zones do not stop the remaining deletions; all errors are
-// collected and returned together at the end.
+// a multi-select prompt, then hands off to deleteSelectedZones.
 func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
 	zones, err := client.Zone.All(cmd.Context())
 	if err != nil {
@@ -118,18 +116,34 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
 		byLabel[label] = z
 	}
 
-	selected, err := base.PromptMultiSelect("Select zones to delete", labels)
+	selectedLabels, err := base.PromptMultiSelect("Select zones to delete", labels)
 	if err != nil {
 		return err
 	}
+
+	selected := make([]*poweradmin.Zone, 0, len(selectedLabels))
+	for _, label := range selectedLabels {
+		selected = append(selected, byLabel[label])
+	}
+
+	return deleteSelectedZones(cmd, client, selected)
+}
+
+// deleteSelectedZones confirms and deletes the given zones. Failures on
+// individual zones do not stop the remaining deletions; all errors are
+// collected and returned together at the end. Split out from
+// runInteractiveDelete so the deletion/confirmation/error-collection logic
+// can be exercised directly in tests without going through the multi-select
+// prompt.
+func deleteSelectedZones(cmd *cobra.Command, client *poweradmin.Client, selected []*poweradmin.Zone) error {
 	if len(selected) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no zones selected, nothing to do")
 		return nil
 	}
 
 	summary := fmt.Sprintf("The following %d zone(s) will be deleted:\n", len(selected))
-	for _, label := range selected {
-		summary += fmt.Sprintf("  - %s\n", label)
+	for _, z := range selected {
+		summary += fmt.Sprintf("  - %s (id %d)\n", z.Name, z.ID)
 	}
 	summary += "\nProceed? [y/N] "
 	if !base.Confirm(cmd, summary) {
@@ -137,8 +151,7 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
 	}
 
 	var errs []error
-	for _, label := range selected {
-		z := byLabel[label]
+	for _, z := range selected {
 		if _, err := client.Zone.Delete(cmd.Context(), z.ID); err != nil {
 			fmt.Fprintf(cmd.OutOrStdout(), "failed to delete zone %s (id %d): %s\n", z.Name, z.ID, err)
 			errs = append(errs, fmt.Errorf("zone %s: %w", z.Name, err))

@@ -109,11 +109,27 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 	return cmd
 }
 
+// selectZoneName lists all zones and lets the user pick one interactively.
+func selectZoneName(cmd *cobra.Command, client *poweradmin.Client) (string, error) {
+	zones, err := client.Zone.All(cmd.Context())
+	if err != nil {
+		return "", fmt.Errorf("failed to list zones: %w", err)
+	}
+	if len(zones) == 0 {
+		return "", fmt.Errorf("no zones found")
+	}
+
+	names := make([]string, len(zones))
+	for i, z := range zones {
+		names[i] = z.Name
+	}
+
+	return base.PromptSelect("Zone", names, "")
+}
+
 // runInteractiveDelete lists all records in the given zone, lets the user
-// pick zero or more via a multi-select prompt, confirms, and deletes each
-// selected record. Failures on individual records do not stop the
-// remaining deletions; all errors are collected and returned together at
-// the end.
+// pick zero or more via a multi-select prompt, then hands off to
+// deleteSelectedRecords.
 func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, zoneID int) error {
 	records, _, err := client.Record.List(cmd.Context(), zoneID, poweradmin.RecordListOpts{})
 	if err != nil {
@@ -132,18 +148,34 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, zoneID 
 		byLabel[label] = r
 	}
 
-	selected, err := base.PromptMultiSelect("Select records to delete", labels)
+	selectedLabels, err := base.PromptMultiSelect("Select records to delete", labels)
 	if err != nil {
 		return err
 	}
+
+	selected := make([]*poweradmin.Record, 0, len(selectedLabels))
+	for _, label := range selectedLabels {
+		selected = append(selected, byLabel[label])
+	}
+
+	return deleteSelectedRecords(cmd, client, zoneID, selected)
+}
+
+// deleteSelectedRecords confirms and deletes the given records from the
+// given zone. Failures on individual records do not stop the remaining
+// deletions; all errors are collected and returned together at the end.
+// Split out from runInteractiveDelete so the deletion/confirmation/
+// error-collection logic can be exercised directly in tests without going
+// through the multi-select prompt.
+func deleteSelectedRecords(cmd *cobra.Command, client *poweradmin.Client, zoneID int, selected []*poweradmin.Record) error {
 	if len(selected) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no records selected, nothing to do")
 		return nil
 	}
 
 	summary := fmt.Sprintf("The following %d record(s) will be deleted:\n", len(selected))
-	for _, label := range selected {
-		summary += fmt.Sprintf("  - %s\n", label)
+	for _, r := range selected {
+		summary += fmt.Sprintf("  - %s %s %s (id %s)\n", r.Name, r.Type, r.Content, r.ID)
 	}
 	summary += "\nProceed? [y/N] "
 	if !base.Confirm(cmd, summary) {
@@ -151,8 +183,7 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, zoneID 
 	}
 
 	var errs []error
-	for _, label := range selected {
-		r := byLabel[label]
+	for _, r := range selected {
 		if _, err := client.Record.Delete(cmd.Context(), zoneID, r.ID); err != nil {
 			fmt.Fprintf(cmd.OutOrStdout(), "failed to delete record %s %s (id %s): %s\n", r.Name, r.Type, r.ID, err)
 			errs = append(errs, fmt.Errorf("record %s: %w", r.ID, err))
@@ -165,22 +196,4 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, zoneID 
 		return fmt.Errorf("failed to delete %d of %d record(s): %w", len(errs), len(selected), errors.Join(errs...))
 	}
 	return nil
-}
-
-// selectZoneName lists all zones and lets the user pick one interactively.
-func selectZoneName(cmd *cobra.Command, client *poweradmin.Client) (string, error) {
-	zones, err := client.Zone.All(cmd.Context())
-	if err != nil {
-		return "", fmt.Errorf("failed to list zones: %w", err)
-	}
-	if len(zones) == 0 {
-		return "", fmt.Errorf("no zones found")
-	}
-
-	names := make([]string, len(zones))
-	for i, z := range zones {
-		names[i] = z.Name
-	}
-
-	return base.PromptSelect("Zone", names, "")
 }

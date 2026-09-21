@@ -100,10 +100,8 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 }
 
 // runInteractiveDelete lists all permission templates, lets the user pick
-// zero or more via a multi-select prompt, confirms, and deletes each
-// selected template. Failures on individual templates do not stop the
-// remaining deletions; all errors are collected and returned together at
-// the end.
+// zero or more via a multi-select prompt, then hands off to
+// deleteSelectedTemplates.
 func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
 	templates, _, err := client.PermissionTemplate.List(cmd.Context())
 	if err != nil {
@@ -122,18 +120,34 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
 		byLabel[label] = t
 	}
 
-	selected, err := base.PromptMultiSelect("Select permission templates to delete", labels)
+	selectedLabels, err := base.PromptMultiSelect("Select permission templates to delete", labels)
 	if err != nil {
 		return err
 	}
+
+	selected := make([]*poweradmin.PermissionTemplate, 0, len(selectedLabels))
+	for _, label := range selectedLabels {
+		selected = append(selected, byLabel[label])
+	}
+
+	return deleteSelectedTemplates(cmd, client, selected)
+}
+
+// deleteSelectedTemplates confirms and deletes the given permission
+// templates. Failures on individual templates do not stop the remaining
+// deletions; all errors are collected and returned together at the end.
+// Split out from runInteractiveDelete so the deletion/confirmation/
+// error-collection logic can be exercised directly in tests without going
+// through the multi-select prompt.
+func deleteSelectedTemplates(cmd *cobra.Command, client *poweradmin.Client, selected []*poweradmin.PermissionTemplate) error {
 	if len(selected) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no permission templates selected, nothing to do")
 		return nil
 	}
 
 	summary := fmt.Sprintf("The following %d permission template(s) will be deleted:\n", len(selected))
-	for _, label := range selected {
-		summary += fmt.Sprintf("  - %s\n", label)
+	for _, t := range selected {
+		summary += fmt.Sprintf("  - %s (id %d)\n", t.Name, t.ID)
 	}
 	summary += "\nProceed? [y/N] "
 	if !base.Confirm(cmd, summary) {
@@ -141,8 +155,7 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
 	}
 
 	var errs []error
-	for _, label := range selected {
-		t := byLabel[label]
+	for _, t := range selected {
 		if _, err := client.PermissionTemplate.Delete(cmd.Context(), t.ID); err != nil {
 			fmt.Fprintf(cmd.OutOrStdout(), "failed to delete permission template %s (id %d): %s\n", t.Name, t.ID, err)
 			errs = append(errs, fmt.Errorf("template %s: %w", t.Name, err))
