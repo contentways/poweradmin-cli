@@ -58,3 +58,49 @@ func TestGroupsZonesError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestGroupsZonesByID(t *testing.T) {
+	mockGroup := &testutil.MockGroupClient{
+		ZonesFn: func(ctx context.Context, id int) ([]*poweradmin.GroupZone, *poweradmin.Response, error) {
+			return []*poweradmin.GroupZone{{ZoneID: 78, ZoneName: "contentways.org"}}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	err := fx.Run(groups.NewZonesCmd(nil), []string{"--id", "1"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestGroupsZonesJSON(t *testing.T) {
+	mockGroup := &testutil.MockGroupClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Group, *poweradmin.Response, error) {
+			return &poweradmin.Group{ID: 1, Name: name}, nil, nil
+		},
+		ZonesFn: func(ctx context.Context, id int) ([]*poweradmin.GroupZone, *poweradmin.Response, error) {
+			return []*poweradmin.GroupZone{{ZoneID: 78, ZoneName: "contentways.org"}}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	err := fx.Run(groups.NewZonesCmd(nil), []string{"--name", "Administrators", "-o", "json"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	out := fx.Stdout.String()
+	if !strings.Contains(out, "contentways.org") {
+		t.Errorf("expected JSON to contain contentways.org, got:\n%s", out)
+	}
+}
+
+func TestGroupsZonesNilWithoutError(t *testing.T) {
+	mockGroup := &testutil.MockGroupClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Group, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	err := fx.Run(groups.NewZonesCmd(nil), []string{"--name", "Ghosts"})
+	if err == nil {
+		t.Fatal("expected error for nil group with nil error, got nil")
+	}
+}

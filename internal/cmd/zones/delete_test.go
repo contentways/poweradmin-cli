@@ -88,3 +88,16 @@ func TestZonesDeleteError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestZonesDeleteNilWithoutError(t *testing.T) {
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, mockZone, nil)
+	err := fx.Run(zones.NewDeleteCmd(nil), []string{"--name", "ghost.com", "--yes"})
+	if err == nil {
+		t.Fatal("expected error for nil zone with nil error, got nil")
+	}
+}

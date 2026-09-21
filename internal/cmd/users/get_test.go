@@ -76,3 +76,17 @@ func TestUsersGetError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestUsersGetByID(t *testing.T) {
+	mockUser := &testutil.MockUserClient{
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.User, *poweradmin.Response, error) {
+			return &poweradmin.User{ID: id, Username: "max"}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+
+	err := fx.Run(users.NewGetCmd(nil), []string{"--id", "1"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

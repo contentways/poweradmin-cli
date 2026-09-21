@@ -76,3 +76,38 @@ func TestGroupsDeleteError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestGroupsDeleteByID(t *testing.T) {
+	mockGroup := &testutil.MockGroupClient{
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.Group, *poweradmin.Response, error) {
+			return &poweradmin.Group{ID: id, Name: "TestGroup"}, nil, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	err := fx.Run(groups.NewDeleteCmd(nil), []string{"--id", "42", "--yes"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestGroupsDeleteQuiet(t *testing.T) {
+	mockGroup := &testutil.MockGroupClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Group, *poweradmin.Response, error) {
+			return &poweradmin.Group{ID: 42, Name: name}, nil, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	err := fx.Run(groups.NewDeleteCmd(nil), []string{"--name", "TestGroup", "--yes", "-q"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if fx.Stdout.String() != "" {
+		t.Errorf("expected no output in quiet mode, got:\n%s", fx.Stdout.String())
+	}
+}

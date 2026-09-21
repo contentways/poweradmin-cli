@@ -71,3 +71,65 @@ func TestPermissionTemplatesGetError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestPermissionTemplatesGetByID(t *testing.T) {
+	mock := &testutil.MockPermissionTemplateClient{
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return &poweradmin.PermissionTemplate{ID: id, Name: "Administrator"}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	err := fx.Run(permission_templates.NewGetCmd(nil), []string{"--id", "1"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+// TestPermissionTemplatesGetNilWithoutError covers the --name path: the
+// initial GetByName call returns (nil, nil, nil).
+func TestPermissionTemplatesGetNilWithoutError(t *testing.T) {
+	mock := &testutil.MockPermissionTemplateClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	err := fx.Run(permission_templates.NewGetCmd(nil), []string{"--name", "Ghost"})
+	if err == nil {
+		t.Fatal("expected error for nil template with nil error, got nil")
+	}
+}
+
+// TestPermissionTemplatesGetByIDNilWithoutError covers the --id path: the
+// direct GetByID call returns (nil, nil, nil).
+func TestPermissionTemplatesGetByIDNilWithoutError(t *testing.T) {
+	mock := &testutil.MockPermissionTemplateClient{
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	err := fx.Run(permission_templates.NewGetCmd(nil), []string{"--id", "99"})
+	if err == nil {
+		t.Fatal("expected error for nil template with nil error, got nil")
+	}
+}
+
+// TestPermissionTemplatesGetByNameSecondCallNilWithoutError covers the
+// --name path's second GetByID call (after successfully resolving the name)
+// returning (nil, nil, nil).
+func TestPermissionTemplatesGetByNameSecondCallNilWithoutError(t *testing.T) {
+	mock := &testutil.MockPermissionTemplateClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return &poweradmin.PermissionTemplate{ID: 1, Name: name}, nil, nil
+		},
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	err := fx.Run(permission_templates.NewGetCmd(nil), []string{"--name", "Administrator"})
+	if err == nil {
+		t.Fatal("expected error for nil template with nil error, got nil")
+	}
+}

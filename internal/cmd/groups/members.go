@@ -44,6 +44,9 @@ func NewMembersCmd(s *state.State) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("failed to resolve group: %w", err)
 				}
+				if group == nil {
+					return fmt.Errorf("group %q not found", name)
+				}
 				groupID = group.ID
 			}
 

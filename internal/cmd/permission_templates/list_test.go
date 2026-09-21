@@ -62,3 +62,16 @@ func TestPermissionTemplatesListError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestPermissionTemplatesListEmptyResult(t *testing.T) {
+	mock := &testutil.MockPermissionTemplateClient{
+		ListFn: func(ctx context.Context) ([]*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return []*poweradmin.PermissionTemplate{}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	err := fx.Run(permission_templates.NewListCmd(nil), []string{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

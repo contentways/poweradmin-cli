@@ -47,6 +47,9 @@ func NewGetCmd(s *state.State) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("failed to get permission template: %w", err)
 				}
+				if tmpl == nil {
+					return fmt.Errorf("permission template id %d not found", id)
+				}
 			} else {
 				// GetByName returns a list result without full permissions.
 				// Call GetByID to get the full permission list.
@@ -54,9 +57,15 @@ func NewGetCmd(s *state.State) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("failed to get permission template: %w", err)
 				}
+				if t == nil {
+					return fmt.Errorf("permission template %q not found", name)
+				}
 				tmpl, _, err = client.PermissionTemplate.GetByID(cmd.Context(), t.ID)
 				if err != nil {
 					return fmt.Errorf("failed to get permission template details: %w", err)
+				}
+				if tmpl == nil {
+					return fmt.Errorf("permission template id %d not found", t.ID)
 				}
 			}
 

@@ -67,3 +67,16 @@ func TestGroupsGetError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestGroupsGetByID(t *testing.T) {
+	mockGroup := &testutil.MockGroupClient{
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.Group, *poweradmin.Response, error) {
+			return &poweradmin.Group{ID: id, Name: "Administrators"}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	err := fx.Run(groups.NewGetCmd(nil), []string{"--id", "1"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

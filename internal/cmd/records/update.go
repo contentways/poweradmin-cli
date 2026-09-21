@@ -58,6 +58,9 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("failed to resolve zone: %w", err)
 				}
+				if zone == nil {
+					return fmt.Errorf("zone %q not found", zoneName)
+				}
 				zoneID = zone.ID
 			}
 

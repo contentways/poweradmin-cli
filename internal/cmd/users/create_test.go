@@ -168,3 +168,101 @@ func TestUsersCreateInteractiveDeclineAbortsWithoutCreating(t *testing.T) {
 		t.Error("expected user NOT to be created after declining confirmation")
 	}
 }
+
+func TestUsersCreateQuiet(t *testing.T) {
+	mockUser := &testutil.MockUserClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.UserCreateOpts) (int, *poweradmin.Response, error) {
+			return 42, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+
+	err := fx.Run(users.NewCreateCmd(), []string{
+		"--username", "max",
+		"--password", "secret123",
+		"--email", "max@example.com",
+		"--quiet",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	out := strings.TrimSpace(fx.Stdout.String())
+	if out != "42" {
+		t.Errorf("expected quiet output to be just the id, got: %q", out)
+	}
+}
+
+func TestUsersCreateExplicitlyInactive(t *testing.T) {
+	var createdActive bool
+	mockUser := &testutil.MockUserClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.UserCreateOpts) (int, *poweradmin.Response, error) {
+			createdActive = opts.Active
+			return 42, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+
+	err := fx.Run(users.NewCreateCmd(), []string{
+		"--username", "max",
+		"--password", "secret123",
+		"--email", "max@example.com",
+		"--active=false",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if createdActive {
+		t.Error("expected active to be false")
+	}
+}
+
+// TestUsersCreateInteractiveFullFlow drives the huh prompts for username,
+// email, fullname, and active via accessible mode — --password is still
+// supplied via flag, since the masked password prompt uses term.ReadPassword
+// directly against a real terminal file descriptor and cannot be driven
+// through a piped stdin.
+func TestUsersCreateInteractiveFullFlow(t *testing.T) {
+	testutil.WithAccessiblePrompts(t)
+
+	var createdUsername, createdEmail, createdFullname string
+	var createdActive bool
+	mockUser := &testutil.MockUserClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.UserCreateOpts) (int, *poweradmin.Response, error) {
+			createdUsername = opts.Username
+			createdEmail = opts.Email
+			createdFullname = opts.Fullname
+			createdActive = opts.Active
+			return 42, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+
+	// username, email, fullname, active (y), then the final confirmation.
+	testutil.WithDelayedStdin(t,
+		"max\n",
+		"max@example.com\n",
+		"Max Mustermann\n",
+		"y\n",
+		"y\n",
+	)
+
+	err := fx.Run(users.NewCreateCmd(), []string{
+		"--password", "secret123",
+		"--interactive",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if createdUsername != "max" {
+		t.Errorf("expected username max, got %q", createdUsername)
+	}
+	if createdEmail != "max@example.com" {
+		t.Errorf("expected email max@example.com, got %q", createdEmail)
+	}
+	if createdFullname != "Max Mustermann" {
+		t.Errorf("expected fullname Max Mustermann, got %q", createdFullname)
+	}
+	if !createdActive {
+		t.Error("expected active to be true")
+	}
+}

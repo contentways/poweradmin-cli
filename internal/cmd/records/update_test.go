@@ -124,3 +124,20 @@ func TestRecordsUpdateByZoneID(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestRecordsUpdateNilWithoutError(t *testing.T) {
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, mockZone, &testutil.MockRecordClient{}, nil, nil, nil)
+	err := fx.Run(records.NewUpdateCmd(nil), []string{
+		"--zone-name", "ghost.com",
+		"--id", "rec-1",
+		"--content", "1.2.3.4",
+	})
+	if err == nil {
+		t.Fatal("expected error for nil zone with nil error, got nil")
+	}
+}

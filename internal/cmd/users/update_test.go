@@ -95,3 +95,48 @@ func TestUsersUpdateError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestUsersUpdateByID(t *testing.T) {
+	mockUser := &testutil.MockUserClient{
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.User, *poweradmin.Response, error) {
+			return &poweradmin.User{ID: id, Username: "max"}, nil, nil
+		},
+		UpdateFn: func(ctx context.Context, id int, opts poweradmin.UserUpdateOpts) (*poweradmin.User, *poweradmin.Response, error) {
+			return &poweradmin.User{ID: id, Username: "max", Email: "new@example.com"}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+
+	err := fx.Run(users.NewUpdateCmd(nil), []string{
+		"--id", "42",
+		"--email", "new@example.com",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestUsersUpdateSetInactive(t *testing.T) {
+	var updatedActive *bool
+	mockUser := &testutil.MockUserClient{
+		GetByNameFn: func(ctx context.Context, username string) (*poweradmin.User, *poweradmin.Response, error) {
+			return &poweradmin.User{ID: 42, Username: username}, nil, nil
+		},
+		UpdateFn: func(ctx context.Context, id int, opts poweradmin.UserUpdateOpts) (*poweradmin.User, *poweradmin.Response, error) {
+			updatedActive = opts.Active
+			return &poweradmin.User{ID: id, Username: "max"}, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+
+	err := fx.Run(users.NewUpdateCmd(nil), []string{
+		"--name", "max",
+		"--active=false",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if updatedActive == nil || *updatedActive {
+		t.Errorf("expected active to be set to false, got %v", updatedActive)
+	}
+}

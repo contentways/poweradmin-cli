@@ -101,3 +101,23 @@ func TestUsersSetPermissionTemplateError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestUsersSetPermissionTemplateByID(t *testing.T) {
+	mockUser := &testutil.MockUserClient{
+		GetByIDFn: func(ctx context.Context, id int) (*poweradmin.User, *poweradmin.Response, error) {
+			return &poweradmin.User{ID: id, Username: "max"}, nil, nil
+		},
+		SetPermissionTemplateFn: func(ctx context.Context, id, permTemplID int) (*poweradmin.Response, error) {
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+
+	err := fx.Run(users.NewSetPermissionTemplateCmd(nil), []string{
+		"--id", "42",
+		"--template-id", "5",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
