@@ -1,5 +1,11 @@
 # Changelog
 
+## [v3.3.1](https://github.com/contentways/poweradmin-cli/releases/tag/v3.3.1)
+
+### Bug Fixes
+
+- guard against nil zone/user/group in Resolve helpers
+
 ## [v3.3.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.3.0)
 
 ### Features
