@@ -127,3 +127,25 @@ func TestRecordsGetError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestRecordsGetByZoneID(t *testing.T) {
+	mockRecord := &testutil.MockRecordClient{
+		AllFn: func(ctx context.Context, zoneID int) ([]*poweradmin.Record, error) {
+			if zoneID != 9 {
+				t.Errorf("expected zoneID 9, got %d", zoneID)
+			}
+			return []*poweradmin.Record{
+				{ID: "rec-1", Name: "www.example.com", Type: "A", Content: "1.2.3.4"},
+			}, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, &testutil.MockZoneClient{}, mockRecord, nil, nil, nil)
+
+	err := fx.Run(records.NewGetCmd(nil), []string{
+		"--zone-id", "9",
+		"--id", "rec-1",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

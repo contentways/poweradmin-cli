@@ -199,3 +199,87 @@ func TestRecordsCreateInteractiveDeclineAbortsWithoutCreating(t *testing.T) {
 		t.Error("expected record NOT to be created after declining confirmation")
 	}
 }
+
+func TestRecordsCreateByZoneID(t *testing.T) {
+	mockRecord := &testutil.MockRecordClient{
+		CreateFn: func(ctx context.Context, zoneID int, opts poweradmin.RecordCreateOpts) (string, *poweradmin.Response, error) {
+			if zoneID != 7 {
+				t.Errorf("expected zoneID 7, got %d", zoneID)
+			}
+			return "rec-99", nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, &testutil.MockZoneClient{}, mockRecord)
+
+	err := fx.Run(records.NewCreateCmd(), []string{
+		"--zone-id", "7",
+		"--name", "www.example.com",
+		"--type", "A",
+		"--content", "1.2.3.4",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(fx.Stdout.String(), "rec-99") {
+		t.Errorf("expected output to contain rec-99, got:\n%s", fx.Stdout.String())
+	}
+}
+
+func TestRecordsCreateQuiet(t *testing.T) {
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return &poweradmin.Zone{ID: 1, Name: name}, nil, nil
+		},
+	}
+	mockRecord := &testutil.MockRecordClient{
+		CreateFn: func(ctx context.Context, zoneID int, opts poweradmin.RecordCreateOpts) (string, *poweradmin.Response, error) {
+			return "rec-42", nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, mockZone, mockRecord)
+
+	err := fx.Run(records.NewCreateCmd(), []string{
+		"--zone-name", "example.com",
+		"--name", "www.example.com",
+		"--type", "A",
+		"--content", "1.2.3.4",
+		"--quiet",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	out := strings.TrimSpace(fx.Stdout.String())
+	if out != "rec-42" {
+		t.Errorf("expected quiet output to be just the id, got: %q", out)
+	}
+}
+
+func TestRecordsCreateMXWithPriority(t *testing.T) {
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return &poweradmin.Zone{ID: 1, Name: name}, nil, nil
+		},
+	}
+	var createdPriority int
+	mockRecord := &testutil.MockRecordClient{
+		CreateFn: func(ctx context.Context, zoneID int, opts poweradmin.RecordCreateOpts) (string, *poweradmin.Response, error) {
+			createdPriority = opts.Priority
+			return "rec-mx", nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, mockZone, mockRecord)
+
+	err := fx.Run(records.NewCreateCmd(), []string{
+		"--zone-name", "example.com",
+		"--name", "example.com",
+		"--type", "MX",
+		"--content", "mail.example.com",
+		"--priority", "10",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if createdPriority != 10 {
+		t.Errorf("expected priority 10, got %d", createdPriority)
+	}
+}
