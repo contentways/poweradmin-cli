@@ -756,3 +756,47 @@ func TestResolveZoneIDNilWithoutError(t *testing.T) {
 		t.Fatal("expected error for nil zone with nil error, got nil")
 	}
 }
+
+func TestResolveUserNilWithoutError(t *testing.T) {
+	mockUser := &testutil.MockUserClient{
+		GetByNameFn: func(ctx context.Context, username string) (*poweradmin.User, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+
+	cmd := &cobra.Command{Use: "test"}
+	cmd.Flags().String("name", "", "")
+	cmd.Flags().String("id", "", "")
+	if err := cmd.Flags().Set("name", "ghost"); err != nil {
+		t.Fatalf("failed to set name flag: %v", err)
+	}
+	cmd.SetContext(fx.State.WithContext(context.Background()))
+
+	_, err := base.ResolveUser(cmd, fx.State.MockClient)
+	if err == nil {
+		t.Fatal("expected error for nil user with nil error, got nil")
+	}
+}
+
+func TestResolveGroupNilWithoutError(t *testing.T) {
+	mockGroup := &testutil.MockGroupClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Group, *poweradmin.Response, error) {
+			return nil, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+
+	cmd := &cobra.Command{Use: "test"}
+	cmd.Flags().String("name", "", "")
+	cmd.Flags().String("id", "", "")
+	if err := cmd.Flags().Set("name", "Ghosts"); err != nil {
+		t.Fatalf("failed to set name flag: %v", err)
+	}
+	cmd.SetContext(fx.State.WithContext(context.Background()))
+
+	_, err := base.ResolveGroup(cmd, fx.State.MockClient)
+	if err == nil {
+		t.Fatal("expected error for nil group with nil error, got nil")
+	}
+}
