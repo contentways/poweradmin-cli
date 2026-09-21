@@ -13,6 +13,7 @@ poweradmin groups delete [flags]
 ### Options
 
 ```
+      --dry-run         Show what would be deleted without making changes
   -h, --help            help for delete
       --id string       Group ID to identify the group
   -i, --interactive     Interactively select groups to delete (feature preview)

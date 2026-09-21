@@ -119,3 +119,32 @@ func TestPermissionTemplatesDeleteNilWithoutError(t *testing.T) {
 		t.Fatal("expected error for nil template with nil error, got nil")
 	}
 }
+
+// TestPermissionTemplatesDeleteDryRun verifies that --dry-run prints what
+// would be deleted without calling Delete or prompting for confirmation.
+func TestPermissionTemplatesDeleteDryRun(t *testing.T) {
+	deleteCalled := false
+	mock := &testutil.MockPermissionTemplateClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.PermissionTemplate, *poweradmin.Response, error) {
+			return &poweradmin.PermissionTemplate{ID: 1, Name: name}, nil, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			deleteCalled = true
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	// No stdin provided — dry-run must never prompt.
+
+	err := fx.Run(permission_templates.NewDeleteCmd(nil), []string{"--name", "MyTemplate", "--dry-run"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if deleteCalled {
+		t.Error("expected Delete to never be called with --dry-run")
+	}
+	out := fx.Stdout.String()
+	if !strings.Contains(out, "Would delete permission template MyTemplate (id 1)") {
+		t.Errorf("expected dry-run message, got:\n%s", out)
+	}
+}

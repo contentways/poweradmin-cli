@@ -32,7 +32,7 @@ func TestDeleteSelectedTemplatesAllSucceed(t *testing.T) {
 		{ID: 2, Name: "Viewers"},
 	}
 
-	err := deleteSelectedTemplates(cmd, fx.State.MockClient, selected)
+	err := deleteSelectedTemplates(cmd, fx.State.MockClient, selected, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestDeleteSelectedTemplatesPartialFailure(t *testing.T) {
 		{ID: 3, Name: "Admins"},
 	}
 
-	err := deleteSelectedTemplates(cmd, fx.State.MockClient, selected)
+	err := deleteSelectedTemplates(cmd, fx.State.MockClient, selected, false)
 	if err == nil {
 		t.Fatal("expected error due to partial failure, got nil")
 	}
@@ -100,7 +100,7 @@ func TestDeleteSelectedTemplatesEmptySelectionNoOp(t *testing.T) {
 	cmd := &cobra.Command{Use: "test"}
 	cmd.SetOut(fx.Stdout)
 
-	err := deleteSelectedTemplates(cmd, fx.State.MockClient, nil)
+	err := deleteSelectedTemplates(cmd, fx.State.MockClient, nil, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -128,11 +128,53 @@ func TestDeleteSelectedTemplatesDeclineAbortsWithoutDeleting(t *testing.T) {
 
 	selected := []*poweradmin.PermissionTemplate{{ID: 1, Name: "Editors"}}
 
-	err := deleteSelectedTemplates(cmd, fx.State.MockClient, selected)
+	err := deleteSelectedTemplates(cmd, fx.State.MockClient, selected, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if called {
 		t.Error("expected Delete to never be called after declining confirmation")
+	}
+}
+
+// TestDeleteSelectedTemplatesDryRunMakesNoAPICalls verifies that dry-run
+// mode prints what would be deleted without calling Delete or prompting
+// for confirmation at all.
+func TestDeleteSelectedTemplatesDryRunMakesNoAPICalls(t *testing.T) {
+	called := false
+	mock := &testutil.MockPermissionTemplateClient{
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			called = true
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, nil, mock)
+	// No stdin provided — dry-run must never reach base.Confirm.
+
+	cmd := &cobra.Command{Use: "test"}
+	cmd.SetOut(fx.Stdout)
+
+	selected := []*poweradmin.PermissionTemplate{
+		{ID: 1, Name: "Editors"},
+		{ID: 2, Name: "Viewers"},
+	}
+
+	err := deleteSelectedTemplates(cmd, fx.State.MockClient, selected, true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if called {
+		t.Error("expected Delete to never be called in dry-run mode")
+	}
+
+	out := fx.Stdout.String()
+	if !strings.Contains(out, "Would delete 2 permission template(s)") {
+		t.Errorf("expected dry-run summary, got:\n%s", out)
+	}
+	if !strings.Contains(out, "Editors") || !strings.Contains(out, "Viewers") {
+		t.Errorf("expected both template names listed, got:\n%s", out)
+	}
+	if !strings.Contains(out, "No changes made") {
+		t.Errorf("expected 'No changes made' confirmation, got:\n%s", out)
 	}
 }

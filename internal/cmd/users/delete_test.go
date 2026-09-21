@@ -125,3 +125,32 @@ func TestUsersDeleteQuiet(t *testing.T) {
 		t.Errorf("expected no output in quiet mode, got:\n%s", fx.Stdout.String())
 	}
 }
+
+// TestUsersDeleteDryRun verifies that --dry-run prints what would be
+// deleted without calling Delete or prompting for confirmation.
+func TestUsersDeleteDryRun(t *testing.T) {
+	deleteCalled := false
+	mockUser := &testutil.MockUserClient{
+		GetByNameFn: func(ctx context.Context, username string) (*poweradmin.User, *poweradmin.Response, error) {
+			return &poweradmin.User{ID: 42, Username: username}, nil, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			deleteCalled = true
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+	// No stdin provided — dry-run must never prompt.
+
+	err := fx.Run(users.NewDeleteCmd(nil), []string{"--name", "max", "--dry-run"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if deleteCalled {
+		t.Error("expected Delete to never be called with --dry-run")
+	}
+	out := fx.Stdout.String()
+	if !strings.Contains(out, "Would delete user max (id 42)") {
+		t.Errorf("expected dry-run message, got:\n%s", out)
+	}
+}

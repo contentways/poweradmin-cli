@@ -32,7 +32,7 @@ func TestDeleteSelectedRecordsAllSucceed(t *testing.T) {
 		{ID: "rec-2", Name: "mail.example.com", Type: "A", Content: "1.2.3.5"},
 	}
 
-	err := deleteSelectedRecords(cmd, fx.State.MockClient, 42, selected)
+	err := deleteSelectedRecords(cmd, fx.State.MockClient, 42, selected, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestDeleteSelectedRecordsPartialFailure(t *testing.T) {
 		{ID: "rec-3", Name: "ftp.example.com", Type: "A", Content: "1.2.3.6"},
 	}
 
-	err := deleteSelectedRecords(cmd, fx.State.MockClient, 42, selected)
+	err := deleteSelectedRecords(cmd, fx.State.MockClient, 42, selected, false)
 	if err == nil {
 		t.Fatal("expected error due to partial failure, got nil")
 	}
@@ -100,7 +100,7 @@ func TestDeleteSelectedRecordsEmptySelectionNoOp(t *testing.T) {
 	cmd := &cobra.Command{Use: "test"}
 	cmd.SetOut(fx.Stdout)
 
-	err := deleteSelectedRecords(cmd, fx.State.MockClient, 42, nil)
+	err := deleteSelectedRecords(cmd, fx.State.MockClient, 42, nil, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -130,11 +130,52 @@ func TestDeleteSelectedRecordsDeclineAbortsWithoutDeleting(t *testing.T) {
 		{ID: "rec-1", Name: "www.example.com", Type: "A", Content: "1.2.3.4"},
 	}
 
-	err := deleteSelectedRecords(cmd, fx.State.MockClient, 42, selected)
+	err := deleteSelectedRecords(cmd, fx.State.MockClient, 42, selected, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if called {
 		t.Error("expected Delete to never be called after declining confirmation")
+	}
+}
+
+// TestDeleteSelectedRecordsDryRunMakesNoAPICalls verifies that dry-run mode
+// prints what would be deleted without calling Delete or prompting for
+// confirmation at all.
+func TestDeleteSelectedRecordsDryRunMakesNoAPICalls(t *testing.T) {
+	called := false
+	mockRecord := &testutil.MockRecordClient{
+		DeleteFn: func(ctx context.Context, zoneID int, recordID string) (*poweradmin.Response, error) {
+			called = true
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, &testutil.MockZoneClient{}, mockRecord)
+	// No stdin provided — dry-run must never reach base.Confirm.
+
+	cmd := &cobra.Command{Use: "test"}
+	cmd.SetOut(fx.Stdout)
+
+	selected := []*poweradmin.Record{
+		{ID: "rec-1", Name: "www.example.com", Type: "A", Content: "1.2.3.4"},
+	}
+
+	err := deleteSelectedRecords(cmd, fx.State.MockClient, 42, selected, true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if called {
+		t.Error("expected Delete to never be called in dry-run mode")
+	}
+
+	out := fx.Stdout.String()
+	if !strings.Contains(out, "Would delete 1 record(s)") {
+		t.Errorf("expected dry-run summary, got:\n%s", out)
+	}
+	if !strings.Contains(out, "www.example.com") {
+		t.Errorf("expected record name listed, got:\n%s", out)
+	}
+	if !strings.Contains(out, "No changes made") {
+		t.Errorf("expected 'No changes made' confirmation, got:\n%s", out)
 	}
 }

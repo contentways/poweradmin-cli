@@ -13,6 +13,7 @@ poweradmin users delete [flags]
 ### Options
 
 ```
+      --dry-run         Show what would be deleted without making changes
   -h, --help            help for delete
       --id string       User ID to identify the user
   -i, --interactive     Interactively select users to delete (feature preview)

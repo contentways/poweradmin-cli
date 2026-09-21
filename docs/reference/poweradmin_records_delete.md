@@ -13,6 +13,7 @@ poweradmin records delete [flags]
 ### Options
 
 ```
+      --dry-run            Show what would be deleted without making changes
   -h, --help               help for delete
       --id string          Record ID (opaque string returned by the API)
   -i, --interactive        Interactively select records to delete (feature preview)

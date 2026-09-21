@@ -111,3 +111,32 @@ func TestGroupsDeleteQuiet(t *testing.T) {
 		t.Errorf("expected no output in quiet mode, got:\n%s", fx.Stdout.String())
 	}
 }
+
+// TestGroupsDeleteDryRun verifies that --dry-run prints what would be
+// deleted without calling Delete or prompting for confirmation.
+func TestGroupsDeleteDryRun(t *testing.T) {
+	deleteCalled := false
+	mockGroup := &testutil.MockGroupClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Group, *poweradmin.Response, error) {
+			return &poweradmin.Group{ID: 42, Name: name}, nil, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			deleteCalled = true
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	// No stdin provided — dry-run must never prompt.
+
+	err := fx.Run(groups.NewDeleteCmd(nil), []string{"--name", "TestGroup", "--dry-run"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if deleteCalled {
+		t.Error("expected Delete to never be called with --dry-run")
+	}
+	out := fx.Stdout.String()
+	if !strings.Contains(out, "Would delete group TestGroup (id 42)") {
+		t.Errorf("expected dry-run message, got:\n%s", out)
+	}
+}

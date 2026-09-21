@@ -13,6 +13,7 @@ poweradmin zones delete [flags]
 ### Options
 
 ```
+      --dry-run         Show what would be deleted without making changes
   -h, --help            help for delete
       --id string       Zone ID
   -i, --interactive     Interactively select zones to delete (feature preview)

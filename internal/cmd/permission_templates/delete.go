@@ -24,6 +24,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 			s := state.FromContext(cmd.Context())
 
 			interactive, _ := cmd.Flags().GetBool("interactive")
+			dryRun, _ := cmd.Flags().GetBool("dry-run")
 
 			client, err := s.Client()
 			if err != nil {
@@ -32,7 +33,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 
 			if interactive {
 				base.PrintPreviewNotice(cmd)
-				return runInteractiveDelete(cmd, client)
+				return runInteractiveDelete(cmd, client, dryRun)
 			}
 
 			name, _ := cmd.Flags().GetString("name")
@@ -62,6 +63,11 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 				}
 				tmplID = t.ID
 				tmplName = t.Name
+			}
+
+			if dryRun {
+				fmt.Fprintf(cmd.OutOrStdout(), "Would delete permission template %s (id %d). No changes made.\n", tmplName, tmplID)
+				return nil
 			}
 
 			if !base.Confirm(cmd, fmt.Sprintf("Delete permission template %s (id %d)? [y/N] ", tmplName, tmplID)) {
@@ -98,6 +104,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 	cmd.Flags().BoolP("yes", "y", false, "Skip confirmation prompt")
 	cmd.Flags().BoolP("quiet", "q", false, "Suppress output after deletion")
 	cmd.Flags().BoolP("interactive", "i", false, "Interactively select templates to delete (feature preview)")
+	cmd.Flags().Bool("dry-run", false, "Show what would be deleted without making changes")
 	cmd.RegisterFlagCompletionFunc("name", base.PermissionTemplateNameCompletion(s))
 	return cmd
 }
@@ -105,7 +112,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 // runInteractiveDelete lists all permission templates, lets the user pick
 // zero or more via a multi-select prompt, then hands off to
 // deleteSelectedTemplates.
-func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
+func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, dryRun bool) error {
 	templates, _, err := client.PermissionTemplate.List(cmd.Context())
 	if err != nil {
 		return fmt.Errorf("failed to list permission templates: %w", err)
@@ -133,18 +140,28 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
 		selected = append(selected, byLabel[label])
 	}
 
-	return deleteSelectedTemplates(cmd, client, selected)
+	return deleteSelectedTemplates(cmd, client, selected, dryRun)
 }
 
 // deleteSelectedTemplates confirms and deletes the given permission
-// templates. Failures on individual templates do not stop the remaining
-// deletions; all errors are collected and returned together at the end.
-// Split out from runInteractiveDelete so the deletion/confirmation/
-// error-collection logic can be exercised directly in tests without going
-// through the multi-select prompt.
-func deleteSelectedTemplates(cmd *cobra.Command, client *poweradmin.Client, selected []*poweradmin.PermissionTemplate) error {
+// templates. In dry-run mode it prints what would be deleted and returns
+// without confirming or making any API calls. Failures on individual
+// templates do not stop the remaining deletions; all errors are collected
+// and returned together at the end. Split out from runInteractiveDelete so
+// the deletion/confirmation/error-collection logic can be exercised
+// directly in tests without going through the multi-select prompt.
+func deleteSelectedTemplates(cmd *cobra.Command, client *poweradmin.Client, selected []*poweradmin.PermissionTemplate, dryRun bool) error {
 	if len(selected) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no permission templates selected, nothing to do")
+		return nil
+	}
+
+	if dryRun {
+		fmt.Fprintf(cmd.OutOrStdout(), "Would delete %d permission template(s):\n", len(selected))
+		for _, t := range selected {
+			fmt.Fprintf(cmd.OutOrStdout(), "  - %s (id %d)\n", t.Name, t.ID)
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), "No changes made.")
 		return nil
 	}
 

@@ -13,6 +13,7 @@ poweradmin permission-templates delete [flags]
 ### Options
 
 ```
+      --dry-run         Show what would be deleted without making changes
   -h, --help            help for delete
       --id string       Template ID to identify the template
   -i, --interactive     Interactively select templates to delete (feature preview)
