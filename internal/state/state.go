@@ -8,6 +8,7 @@ package state
 
 import (
 	"context"
+	"os"
 
 	"github.com/contentways/poweradmin-go/v3/poweradmin"
 )
@@ -18,6 +19,9 @@ import (
 type State struct {
 	URL    string
 	APIKey string
+	// Verbose enables HTTP request/response debug logging to stderr when
+	// building a real client. Set via the global --verbose/-v flag.
+	Verbose bool
 	// MockClient is used in tests to inject a mock client.
 	// If nil, a real client is built from URL and APIKey.
 	MockClient *poweradmin.Client
@@ -42,10 +46,16 @@ func (s *State) Client() (*poweradmin.Client, error) {
 	if s.MockClient != nil {
 		return s.MockClient, nil
 	}
-	return poweradmin.NewClient(
+
+	opts := []poweradmin.Option{
 		poweradmin.WithBaseURL(s.URL),
 		poweradmin.WithAPIKey(s.APIKey),
-	)
+	}
+	if s.Verbose {
+		opts = append(opts, poweradmin.WithDebugWriter(os.Stderr))
+	}
+
+	return poweradmin.NewClient(opts...)
 }
 
 // WithContext returns a new context with the State embedded under stateKey.

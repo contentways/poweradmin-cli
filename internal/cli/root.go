@@ -46,6 +46,9 @@ func NewRootCommand(s *state.State) *cobra.Command {
 			if apiKey, _ := cmd.Root().PersistentFlags().GetString("api-key"); apiKey != "" {
 				s.APIKey = apiKey
 			}
+			if verbose, _ := cmd.Root().PersistentFlags().GetBool("verbose"); verbose {
+				s.Verbose = true
+			}
 
 			// Embed the State into the context so all subcommands can
 			// retrieve it via state.FromContext(cmd.Context()).
@@ -64,6 +67,7 @@ func NewRootCommand(s *state.State) *cobra.Command {
 	// They override values from the config file and environment variables.
 	root.PersistentFlags().StringP("url", "u", "", "Poweradmin URL (e.g. https://dns.example.com)")
 	root.PersistentFlags().StringP("api-key", "k", "", "Poweradmin API key (overrides config and env)")
+	root.PersistentFlags().BoolP("verbose", "v", false, "Log HTTP requests/responses to stderr for debugging")
 
 	// Register all resource subcommands.
 	root.AddCommand(zones.NewZonesCommand(s))
