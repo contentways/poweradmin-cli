@@ -67,3 +67,71 @@ func TestGroupsCreateError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+// TestGroupsCreateInteractiveSkipsPromptsWhenAllFlagsSet verifies that when
+// --interactive is combined with all required values already supplied via
+// flags (--description and --perm-template-id explicitly set so those huh
+// prompts don't fire), no huh prompt runs at all — only the final
+// confirmation, answered via a piped stdin.
+func TestGroupsCreateInteractiveSkipsPromptsWhenAllFlagsSet(t *testing.T) {
+	var createdName, createdDescription string
+	var createdPermTemplID int
+
+	mockGroup := &testutil.MockGroupClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.GroupCreateOpts) (int, *poweradmin.Response, error) {
+			createdName = opts.Name
+			createdDescription = opts.Description
+			createdPermTemplID = opts.PermTemplID
+			return 42, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	testutil.WithStdin(t, "y\n")
+
+	err := fx.Run(groups.NewCreateCmd(), []string{
+		"--name", "TestGroup",
+		"--description", "A test group",
+		"--perm-template-id", "3",
+		"--interactive",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if createdName != "TestGroup" {
+		t.Errorf("expected name TestGroup, got %q", createdName)
+	}
+	if createdDescription != "A test group" {
+		t.Errorf("expected description 'A test group', got %q", createdDescription)
+	}
+	if createdPermTemplID != 3 {
+		t.Errorf("expected perm-template-id 3, got %d", createdPermTemplID)
+	}
+}
+
+// TestGroupsCreateInteractiveDeclineAbortsWithoutCreating verifies that
+// declining the final confirmation prevents the API call entirely.
+func TestGroupsCreateInteractiveDeclineAbortsWithoutCreating(t *testing.T) {
+	created := false
+	mockGroup := &testutil.MockGroupClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.GroupCreateOpts) (int, *poweradmin.Response, error) {
+			created = true
+			return 42, nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, nil, mockGroup, nil)
+	testutil.WithStdin(t, "n\n")
+
+	err := fx.Run(groups.NewCreateCmd(), []string{
+		"--name", "TestGroup",
+		"--description", "A test group",
+		"--perm-template-id", "3",
+		"--interactive",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if created {
+		t.Error("expected group NOT to be created after declining confirmation")
+	}
+}

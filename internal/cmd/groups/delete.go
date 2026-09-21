@@ -85,39 +85,53 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 }
 
 // runInteractiveDelete lists all groups, lets the user pick zero or more via
-// a multi-select prompt, confirms, and deletes each selected group. Failures
-// on individual groups do not stop the remaining deletions; all errors are
-// collected and returned together at the end.
+// a multi-select prompt, then hands off to deleteSelectedGroups.
 func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
-	groups, err := client.Group.All(cmd.Context())
+	grps, err := client.Group.All(cmd.Context())
 	if err != nil {
 		return fmt.Errorf("failed to list groups: %w", err)
 	}
-	if len(groups) == 0 {
+	if len(grps) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no groups found")
 		return nil
 	}
 
-	labels := make([]string, len(groups))
-	byLabel := make(map[string]*poweradmin.Group, len(groups))
-	for i, g := range groups {
+	labels := make([]string, len(grps))
+	byLabel := make(map[string]*poweradmin.Group, len(grps))
+	for i, g := range grps {
 		label := fmt.Sprintf("%s (id %d)", g.Name, g.ID)
 		labels[i] = label
 		byLabel[label] = g
 	}
 
-	selected, err := base.PromptMultiSelect("Select groups to delete", labels)
+	selectedLabels, err := base.PromptMultiSelect("Select groups to delete", labels)
 	if err != nil {
 		return err
 	}
+
+	selected := make([]*poweradmin.Group, 0, len(selectedLabels))
+	for _, label := range selectedLabels {
+		selected = append(selected, byLabel[label])
+	}
+
+	return deleteSelectedGroups(cmd, client, selected)
+}
+
+// deleteSelectedGroups confirms and deletes the given groups. Failures on
+// individual groups do not stop the remaining deletions; all errors are
+// collected and returned together at the end. Split out from
+// runInteractiveDelete so the deletion/confirmation/error-collection logic
+// can be exercised directly in tests without going through the multi-select
+// prompt.
+func deleteSelectedGroups(cmd *cobra.Command, client *poweradmin.Client, selected []*poweradmin.Group) error {
 	if len(selected) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no groups selected, nothing to do")
 		return nil
 	}
 
 	summary := fmt.Sprintf("The following %d group(s) will be deleted:\n", len(selected))
-	for _, label := range selected {
-		summary += fmt.Sprintf("  - %s\n", label)
+	for _, g := range selected {
+		summary += fmt.Sprintf("  - %s (id %d)\n", g.Name, g.ID)
 	}
 	summary += "\nProceed? [y/N] "
 	if !base.Confirm(cmd, summary) {
@@ -125,8 +139,7 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
 	}
 
 	var errs []error
-	for _, label := range selected {
-		g := byLabel[label]
+	for _, g := range selected {
 		if _, err := client.Group.Delete(cmd.Context(), g.ID); err != nil {
 			fmt.Fprintf(cmd.OutOrStdout(), "failed to delete group %s (id %d): %s\n", g.Name, g.ID, err)
 			errs = append(errs, fmt.Errorf("group %s: %w", g.Name, err))

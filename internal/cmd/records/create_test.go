@@ -110,3 +110,92 @@ func TestRecordsCreateError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+// TestRecordsCreateInteractiveSkipsPromptsWhenAllFlagsSet verifies that
+// when --interactive is combined with all required values already
+// supplied via flags (--zone-name, --name, --type, --content, --ttl all
+// set, and --type A so the priority prompt doesn't fire since it's only
+// shown for MX/SRV), no huh prompt runs at all — only the final
+// confirmation, answered via a piped stdin.
+func TestRecordsCreateInteractiveSkipsPromptsWhenAllFlagsSet(t *testing.T) {
+	var createdName, createdType, createdContent string
+	var createdTTL int
+
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return &poweradmin.Zone{ID: 1, Name: name, Type: "NATIVE"}, nil, nil
+		},
+	}
+	mockRecord := &testutil.MockRecordClient{
+		CreateFn: func(ctx context.Context, zoneID int, opts poweradmin.RecordCreateOpts) (string, *poweradmin.Response, error) {
+			createdName = opts.Name
+			createdType = opts.Type
+			createdContent = opts.Content
+			createdTTL = opts.TTL
+			return "rec-42", nil, nil
+		},
+	}
+
+	fx := testutil.NewFixtureWithMocks(t, mockZone, mockRecord)
+	testutil.WithStdin(t, "y\n")
+
+	err := fx.Run(records.NewCreateCmd(), []string{
+		"--zone-name", "example.com",
+		"--name", "www.example.com",
+		"--type", "A",
+		"--content", "1.2.3.4",
+		"--ttl", "3600",
+		"--interactive",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if createdName != "www.example.com" {
+		t.Errorf("expected name www.example.com, got %q", createdName)
+	}
+	if createdType != "A" {
+		t.Errorf("expected type A, got %q", createdType)
+	}
+	if createdContent != "1.2.3.4" {
+		t.Errorf("expected content 1.2.3.4, got %q", createdContent)
+	}
+	if createdTTL != 3600 {
+		t.Errorf("expected ttl 3600, got %d", createdTTL)
+	}
+}
+
+// TestRecordsCreateInteractiveDeclineAbortsWithoutCreating verifies that
+// declining the final confirmation prevents the API call entirely.
+func TestRecordsCreateInteractiveDeclineAbortsWithoutCreating(t *testing.T) {
+	created := false
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return &poweradmin.Zone{ID: 1, Name: name, Type: "NATIVE"}, nil, nil
+		},
+	}
+	mockRecord := &testutil.MockRecordClient{
+		CreateFn: func(ctx context.Context, zoneID int, opts poweradmin.RecordCreateOpts) (string, *poweradmin.Response, error) {
+			created = true
+			return "rec-42", nil, nil
+		},
+	}
+
+	fx := testutil.NewFixtureWithMocks(t, mockZone, mockRecord)
+	testutil.WithStdin(t, "n\n")
+
+	err := fx.Run(records.NewCreateCmd(), []string{
+		"--zone-name", "example.com",
+		"--name", "www.example.com",
+		"--type", "A",
+		"--content", "1.2.3.4",
+		"--ttl", "3600",
+		"--interactive",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if created {
+		t.Error("expected record NOT to be created after declining confirmation")
+	}
+}

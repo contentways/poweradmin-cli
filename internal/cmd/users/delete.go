@@ -86,39 +86,53 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 }
 
 // runInteractiveDelete lists all users, lets the user pick zero or more via
-// a multi-select prompt, confirms, and deletes each selected user. Failures
-// on individual users do not stop the remaining deletions; all errors are
-// collected and returned together at the end.
+// a multi-select prompt, then hands off to deleteSelectedUsers.
 func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
-	users, err := client.User.All(cmd.Context())
+	usrs, err := client.User.All(cmd.Context())
 	if err != nil {
 		return fmt.Errorf("failed to list users: %w", err)
 	}
-	if len(users) == 0 {
+	if len(usrs) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no users found")
 		return nil
 	}
 
-	labels := make([]string, len(users))
-	byLabel := make(map[string]*poweradmin.User, len(users))
-	for i, u := range users {
+	labels := make([]string, len(usrs))
+	byLabel := make(map[string]*poweradmin.User, len(usrs))
+	for i, u := range usrs {
 		label := fmt.Sprintf("%s (id %d)", u.Username, u.ID)
 		labels[i] = label
 		byLabel[label] = u
 	}
 
-	selected, err := base.PromptMultiSelect("Select users to delete", labels)
+	selectedLabels, err := base.PromptMultiSelect("Select users to delete", labels)
 	if err != nil {
 		return err
 	}
+
+	selected := make([]*poweradmin.User, 0, len(selectedLabels))
+	for _, label := range selectedLabels {
+		selected = append(selected, byLabel[label])
+	}
+
+	return deleteSelectedUsers(cmd, client, selected)
+}
+
+// deleteSelectedUsers confirms and deletes the given users. Failures on
+// individual users do not stop the remaining deletions; all errors are
+// collected and returned together at the end. Split out from
+// runInteractiveDelete so the deletion/confirmation/error-collection logic
+// can be exercised directly in tests without going through the multi-select
+// prompt.
+func deleteSelectedUsers(cmd *cobra.Command, client *poweradmin.Client, selected []*poweradmin.User) error {
 	if len(selected) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no users selected, nothing to do")
 		return nil
 	}
 
 	summary := fmt.Sprintf("The following %d user(s) will be deleted:\n", len(selected))
-	for _, label := range selected {
-		summary += fmt.Sprintf("  - %s\n", label)
+	for _, u := range selected {
+		summary += fmt.Sprintf("  - %s (id %d)\n", u.Username, u.ID)
 	}
 	summary += "\nProceed? [y/N] "
 	if !base.Confirm(cmd, summary) {
@@ -126,8 +140,7 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
 	}
 
 	var errs []error
-	for _, label := range selected {
-		u := byLabel[label]
+	for _, u := range selected {
 		if _, err := client.User.Delete(cmd.Context(), u.ID); err != nil {
 			fmt.Fprintf(cmd.OutOrStdout(), "failed to delete user %s (id %d): %s\n", u.Username, u.ID, err)
 			errs = append(errs, fmt.Errorf("user %s: %w", u.Username, err))

@@ -98,3 +98,73 @@ func TestUsersCreateError(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+// TestUsersCreateInteractiveSkipsPromptsWhenAllFlagsSet verifies that when
+// --interactive is combined with all required values already supplied via
+// flags (including --password, so the masked term.ReadPassword prompt never
+// fires, and --fullname/--active so those huh prompts don't fire either),
+// no huh prompt runs at all — only the final confirmation, answered via a
+// piped stdin.
+func TestUsersCreateInteractiveSkipsPromptsWhenAllFlagsSet(t *testing.T) {
+	var createdUsername, createdEmail string
+
+	mockUser := &testutil.MockUserClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.UserCreateOpts) (int, *poweradmin.Response, error) {
+			createdUsername = opts.Username
+			createdEmail = opts.Email
+			return 42, nil, nil
+		},
+	}
+
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+	testutil.WithStdin(t, "y\n")
+
+	err := fx.Run(users.NewCreateCmd(), []string{
+		"--username", "max",
+		"--password", "secret123",
+		"--email", "max@example.com",
+		"--fullname", "Max Mustermann",
+		"--active",
+		"--interactive",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if createdUsername != "max" {
+		t.Errorf("expected username max, got %q", createdUsername)
+	}
+	if createdEmail != "max@example.com" {
+		t.Errorf("expected email max@example.com, got %q", createdEmail)
+	}
+}
+
+// TestUsersCreateInteractiveDeclineAbortsWithoutCreating verifies that
+// declining the final confirmation prevents the API call entirely.
+func TestUsersCreateInteractiveDeclineAbortsWithoutCreating(t *testing.T) {
+	created := false
+	mockUser := &testutil.MockUserClient{
+		CreateFn: func(ctx context.Context, opts poweradmin.UserCreateOpts) (int, *poweradmin.Response, error) {
+			created = true
+			return 42, nil, nil
+		},
+	}
+
+	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
+	testutil.WithStdin(t, "n\n")
+
+	err := fx.Run(users.NewCreateCmd(), []string{
+		"--username", "max",
+		"--password", "secret123",
+		"--email", "max@example.com",
+		"--fullname", "Max Mustermann",
+		"--active",
+		"--interactive",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if created {
+		t.Error("expected user NOT to be created after declining confirmation")
+	}
+}
