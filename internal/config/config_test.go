@@ -47,3 +47,39 @@ func TestDefaultPath(t *testing.T) {
 		t.Error("expected non-empty default path")
 	}
 }
+
+func TestLoadInvalidYAML(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yaml")
+
+	// Invalid YAML: a value where a mapping is expected.
+	content := "url: [this is not valid: yaml structure\n"
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatalf("failed to write test config: %v", err)
+	}
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("expected error for invalid YAML, got nil")
+	}
+}
+
+func TestLoadPermissionDenied(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("skipping permission test when running as root")
+	}
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yaml")
+	if err := os.WriteFile(path, []byte("url: https://dns.example.com\n"), 0000); err != nil {
+		t.Fatalf("failed to write test config: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = os.Chmod(path, 0600) // allow cleanup to remove the file
+	})
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("expected error for unreadable file, got nil")
+	}
+}
