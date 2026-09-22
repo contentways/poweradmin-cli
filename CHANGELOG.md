@@ -1,5 +1,11 @@
 # Changelog
 
+## [v3.4.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.4.0)
+
+### Features
+
+- add --dry-run flag to all delete commands
+
 ## [v3.3.1](https://github.com/contentways/poweradmin-cli/releases/tag/v3.3.1)
 
 ### Bug Fixes
