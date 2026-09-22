@@ -20,4 +20,4 @@ jobs:
       - name: releaser-pleaser
         uses: apricote/releaser-pleaser@v0.8.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASER_PLEASER_TOKEN }}
