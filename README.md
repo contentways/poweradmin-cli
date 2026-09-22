@@ -123,6 +123,7 @@ source ~/.bash_completion.d/poweradmin
 | `--quiet` | `-q` | Only print ID (create) or suppress output (delete) |
 | `--yes` | `-y` | Skip delete confirmation prompt |
 | `--verbose` | `-v` | Log HTTP requests/responses to stderr for debugging |
+| `--dry-run` | | Show what would be deleted without making changes (delete commands) |
 
 ### Verbose Mode
 
@@ -166,6 +167,18 @@ by a summary and confirmation before deletion.
 poweradmin zones delete --interactive
 ```
 
+### Dry Run Mode
+
+All `delete` commands support a `--dry-run` flag. It lists what would be
+deleted and exits without prompting for confirmation or making any API
+calls — useful for previewing the effect of a name/ID match or an
+interactive multi-select before committing to it.
+
+```bash
+poweradmin zones delete --name example.com --dry-run
+poweradmin zones delete --interactive --dry-run
+```
+
 ### Zones
 
 ```bash
@@ -199,6 +212,10 @@ poweradmin zones delete --name example.com --yes
 
 # Delete zones interactively (multi-select)
 poweradmin zones delete --interactive
+
+# Preview what would be deleted without making changes
+poweradmin zones delete --name example.com --dry-run
+poweradmin zones delete --interactive --dry-run
 
 # Export a zone as BIND zone file
 poweradmin zones export --name example.com
@@ -269,6 +286,9 @@ poweradmin records delete \
 
 # Delete records interactively (pick a zone, then multi-select records)
 poweradmin records delete --interactive
+
+# Preview what would be deleted without making changes
+poweradmin records delete --zone-name example.com --id <record-id> --dry-run
 ```
 
 ### Users
@@ -309,6 +329,9 @@ poweradmin users delete --name patrick --yes
 # Delete users interactively (multi-select)
 poweradmin users delete --interactive
 
+# Preview what would be deleted without making changes
+poweradmin users delete --name patrick --dry-run
+
 # Assign a permission template
 poweradmin users set-permission-template --name patrick --template-id 2
 ```
@@ -339,6 +362,9 @@ poweradmin groups delete --name "DNS Editors" --yes
 
 # Delete groups interactively (multi-select)
 poweradmin groups delete --interactive
+
+# Preview what would be deleted without making changes
+poweradmin groups delete --name "Zone Editors" --dry-run
 
 # Manage members
 poweradmin groups members --name Administrators
@@ -381,6 +407,9 @@ poweradmin permission-templates delete --name "Zone Editors" --yes
 
 # Delete templates interactively (multi-select)
 poweradmin permission-templates delete --interactive
+
+# Preview what would be deleted without making changes
+poweradmin permission-templates delete --name "Zone Editors" --dry-run
 ```
 
 ### Version

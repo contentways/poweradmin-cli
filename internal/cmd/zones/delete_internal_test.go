@@ -32,7 +32,7 @@ func TestDeleteSelectedZonesAllSucceed(t *testing.T) {
 		{ID: 2, Name: "b.com"},
 	}
 
-	err := deleteSelectedZones(cmd, fx.State.MockClient, selected)
+	err := deleteSelectedZones(cmd, fx.State.MockClient, selected, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestDeleteSelectedZonesPartialFailure(t *testing.T) {
 		{ID: 3, Name: "c.com"},
 	}
 
-	err := deleteSelectedZones(cmd, fx.State.MockClient, selected)
+	err := deleteSelectedZones(cmd, fx.State.MockClient, selected, false)
 	if err == nil {
 		t.Fatal("expected error due to partial failure, got nil")
 	}
@@ -76,7 +76,6 @@ func TestDeleteSelectedZonesPartialFailure(t *testing.T) {
 	}
 
 	out := fx.Stdout.String()
-	// a.com and c.com should still have been attempted and succeeded despite b.com failing.
 	if !strings.Contains(out, "deleted zone a.com") {
 		t.Errorf("expected a.com to be deleted despite b.com failing, got:\n%s", out)
 	}
@@ -101,9 +100,7 @@ func TestDeleteSelectedZonesEmptySelectionNoOp(t *testing.T) {
 	cmd := &cobra.Command{Use: "test"}
 	cmd.SetOut(fx.Stdout)
 
-	// No stdin needed — deleteSelectedZones returns before any confirmation
-	// prompt when the selection is empty.
-	err := deleteSelectedZones(cmd, fx.State.MockClient, nil)
+	err := deleteSelectedZones(cmd, fx.State.MockClient, nil, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -131,11 +128,71 @@ func TestDeleteSelectedZonesDeclineAbortsWithoutDeleting(t *testing.T) {
 
 	selected := []*poweradmin.Zone{{ID: 1, Name: "a.com"}}
 
-	err := deleteSelectedZones(cmd, fx.State.MockClient, selected)
+	err := deleteSelectedZones(cmd, fx.State.MockClient, selected, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if called {
 		t.Error("expected Delete to never be called after declining confirmation")
+	}
+}
+
+// TestDeleteSelectedZonesDryRunMakesNoAPICalls verifies that dry-run mode
+// prints what would be deleted without calling Delete or prompting for
+// confirmation at all.
+func TestDeleteSelectedZonesDryRunMakesNoAPICalls(t *testing.T) {
+	called := false
+	mockZone := &testutil.MockZoneClient{
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			called = true
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, mockZone, nil)
+	// No stdin provided — dry-run must never reach base.Confirm, or this
+	// test would hang waiting for input.
+
+	cmd := &cobra.Command{Use: "test"}
+	cmd.SetOut(fx.Stdout)
+
+	selected := []*poweradmin.Zone{
+		{ID: 1, Name: "a.com"},
+		{ID: 2, Name: "b.com"},
+	}
+
+	err := deleteSelectedZones(cmd, fx.State.MockClient, selected, true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if called {
+		t.Error("expected Delete to never be called in dry-run mode")
+	}
+
+	out := fx.Stdout.String()
+	if !strings.Contains(out, "Would delete 2 zone(s)") {
+		t.Errorf("expected dry-run summary, got:\n%s", out)
+	}
+	if !strings.Contains(out, "a.com") || !strings.Contains(out, "b.com") {
+		t.Errorf("expected both zone names listed, got:\n%s", out)
+	}
+	if !strings.Contains(out, "No changes made") {
+		t.Errorf("expected 'No changes made' confirmation, got:\n%s", out)
+	}
+}
+
+// TestDeleteSelectedZonesDryRunEmptySelectionNoOp verifies dry-run with an
+// empty selection behaves the same as the non-dry-run empty case.
+func TestDeleteSelectedZonesDryRunEmptySelectionNoOp(t *testing.T) {
+	fx := testutil.NewFixtureWithMocks(t, &testutil.MockZoneClient{}, nil)
+
+	cmd := &cobra.Command{Use: "test"}
+	cmd.SetOut(fx.Stdout)
+
+	err := deleteSelectedZones(cmd, fx.State.MockClient, nil, true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(fx.Stdout.String(), "nothing to do") {
+		t.Errorf("expected 'nothing to do' message, got:\n%s", fx.Stdout.String())
 	}
 }

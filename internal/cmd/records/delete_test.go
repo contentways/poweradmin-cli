@@ -149,3 +149,38 @@ func TestRecordsDeleteQuiet(t *testing.T) {
 		t.Errorf("expected no output in quiet mode, got:\n%s", fx.Stdout.String())
 	}
 }
+
+// TestRecordsDeleteDryRun verifies that --dry-run prints what would be
+// deleted without calling Delete or prompting for confirmation.
+func TestRecordsDeleteDryRun(t *testing.T) {
+	deleteCalled := false
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return &poweradmin.Zone{ID: 1, Name: name}, nil, nil
+		},
+	}
+	mockRecord := &testutil.MockRecordClient{
+		DeleteFn: func(ctx context.Context, zoneID int, recordID string) (*poweradmin.Response, error) {
+			deleteCalled = true
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, mockZone, mockRecord)
+	// No stdin provided — dry-run must never prompt.
+
+	err := fx.Run(records.NewDeleteCmd(nil), []string{
+		"--zone-name", "example.com",
+		"--id", "rec-42",
+		"--dry-run",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if deleteCalled {
+		t.Error("expected Delete to never be called with --dry-run")
+	}
+	out := fx.Stdout.String()
+	if !strings.Contains(out, "Would delete record (id rec-42)") {
+		t.Errorf("expected dry-run message, got:\n%s", out)
+	}
+}

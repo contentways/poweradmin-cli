@@ -138,3 +138,32 @@ func TestZonesDeleteInteractiveFullFlow(t *testing.T) {
 		t.Errorf("expected success output, got:\n%s", fx.Stdout.String())
 	}
 }
+
+// TestZonesDeleteDryRun verifies that --dry-run prints what would be
+// deleted without calling Delete or prompting for confirmation.
+func TestZonesDeleteDryRun(t *testing.T) {
+	deleteCalled := false
+	mockZone := &testutil.MockZoneClient{
+		GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+			return &poweradmin.Zone{ID: 42, Name: name, Type: "NATIVE"}, nil, nil
+		},
+		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+			deleteCalled = true
+			return nil, nil
+		},
+	}
+	fx := testutil.NewFixtureWithMocks(t, mockZone, nil)
+	// No stdin provided — dry-run must never prompt.
+
+	err := fx.Run(zones.NewDeleteCmd(nil), []string{"--name", "example.com", "--dry-run"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if deleteCalled {
+		t.Error("expected Delete to never be called with --dry-run")
+	}
+	out := fx.Stdout.String()
+	if !strings.Contains(out, "Would delete zone example.com (id 42)") {
+		t.Errorf("expected dry-run message, got:\n%s", out)
+	}
+}

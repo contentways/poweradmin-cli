@@ -23,6 +23,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 			s := state.FromContext(cmd.Context())
 
 			interactive, _ := cmd.Flags().GetBool("interactive")
+			dryRun, _ := cmd.Flags().GetBool("dry-run")
 
 			client, err := s.Client()
 			if err != nil {
@@ -50,7 +51,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 					return err
 				}
 
-				return runInteractiveDelete(cmd, client, zoneID)
+				return runInteractiveDelete(cmd, client, zoneID, dryRun)
 			}
 
 			zoneName, _ := cmd.Flags().GetString("zone-name")
@@ -67,6 +68,11 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 			zoneID, err := base.ResolveZoneID(cmd, client)
 			if err != nil {
 				return err
+			}
+
+			if dryRun {
+				fmt.Fprintf(cmd.OutOrStdout(), "Would delete record (id %s) from zone (id %d). No changes made.\n", recordID, zoneID)
+				return nil
 			}
 
 			if !base.Confirm(cmd, fmt.Sprintf("Delete record (id %s)? [y/N] ", recordID)) {
@@ -104,6 +110,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 	cmd.Flags().BoolP("yes", "y", false, "Skip confirmation prompt")
 	cmd.Flags().BoolP("quiet", "q", false, "Suppress output after deletion")
 	cmd.Flags().BoolP("interactive", "i", false, "Interactively select records to delete (feature preview)")
+	cmd.Flags().Bool("dry-run", false, "Show what would be deleted without making changes")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.ZoneNameCompletion(s))
 	return cmd
@@ -130,7 +137,7 @@ func selectZoneName(cmd *cobra.Command, client *poweradmin.Client) (string, erro
 // runInteractiveDelete lists all records in the given zone, lets the user
 // pick zero or more via a multi-select prompt, then hands off to
 // deleteSelectedRecords.
-func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, zoneID int) error {
+func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, zoneID int, dryRun bool) error {
 	records, _, err := client.Record.List(cmd.Context(), zoneID, poweradmin.RecordListOpts{})
 	if err != nil {
 		return fmt.Errorf("failed to list records: %w", err)
@@ -158,18 +165,28 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, zoneID 
 		selected = append(selected, byLabel[label])
 	}
 
-	return deleteSelectedRecords(cmd, client, zoneID, selected)
+	return deleteSelectedRecords(cmd, client, zoneID, selected, dryRun)
 }
 
 // deleteSelectedRecords confirms and deletes the given records from the
-// given zone. Failures on individual records do not stop the remaining
-// deletions; all errors are collected and returned together at the end.
-// Split out from runInteractiveDelete so the deletion/confirmation/
-// error-collection logic can be exercised directly in tests without going
-// through the multi-select prompt.
-func deleteSelectedRecords(cmd *cobra.Command, client *poweradmin.Client, zoneID int, selected []*poweradmin.Record) error {
+// given zone. In dry-run mode it prints what would be deleted and returns
+// without confirming or making any API calls. Failures on individual
+// records do not stop the remaining deletions; all errors are collected
+// and returned together at the end. Split out from runInteractiveDelete so
+// the deletion/confirmation/error-collection logic can be exercised
+// directly in tests without going through the multi-select prompt.
+func deleteSelectedRecords(cmd *cobra.Command, client *poweradmin.Client, zoneID int, selected []*poweradmin.Record, dryRun bool) error {
 	if len(selected) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no records selected, nothing to do")
+		return nil
+	}
+
+	if dryRun {
+		fmt.Fprintf(cmd.OutOrStdout(), "Would delete %d record(s):\n", len(selected))
+		for _, r := range selected {
+			fmt.Fprintf(cmd.OutOrStdout(), "  - %s %s %s (id %s)\n", r.Name, r.Type, r.Content, r.ID)
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), "No changes made.")
 		return nil
 	}
 

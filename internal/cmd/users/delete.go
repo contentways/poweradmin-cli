@@ -23,6 +23,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 			s := state.FromContext(cmd.Context())
 
 			interactive, _ := cmd.Flags().GetBool("interactive")
+			dryRun, _ := cmd.Flags().GetBool("dry-run")
 
 			client, err := s.Client()
 			if err != nil {
@@ -31,7 +32,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 
 			if interactive {
 				base.PrintPreviewNotice(cmd)
-				return runInteractiveDelete(cmd, client)
+				return runInteractiveDelete(cmd, client, dryRun)
 			}
 
 			name, _ := cmd.Flags().GetString("name")
@@ -44,6 +45,11 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 			user, err := base.ResolveUser(cmd, client)
 			if err != nil {
 				return err
+			}
+
+			if dryRun {
+				fmt.Fprintf(cmd.OutOrStdout(), "Would delete user %s (id %d). No changes made.\n", user.Username, user.ID)
+				return nil
 			}
 
 			if !base.Confirm(cmd, fmt.Sprintf("Delete user %s (id %d)? [y/N] ", user.Username, user.ID)) {
@@ -80,6 +86,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 	cmd.Flags().BoolP("yes", "y", false, "Skip confirmation prompt")
 	cmd.Flags().BoolP("quiet", "q", false, "Suppress output after deletion")
 	cmd.Flags().BoolP("interactive", "i", false, "Interactively select users to delete (feature preview)")
+	cmd.Flags().Bool("dry-run", false, "Show what would be deleted without making changes")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.UserNameCompletion(s))
 	return cmd
@@ -87,7 +94,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 
 // runInteractiveDelete lists all users, lets the user pick zero or more via
 // a multi-select prompt, then hands off to deleteSelectedUsers.
-func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
+func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, dryRun bool) error {
 	usrs, err := client.User.All(cmd.Context())
 	if err != nil {
 		return fmt.Errorf("failed to list users: %w", err)
@@ -115,18 +122,28 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client) error {
 		selected = append(selected, byLabel[label])
 	}
 
-	return deleteSelectedUsers(cmd, client, selected)
+	return deleteSelectedUsers(cmd, client, selected, dryRun)
 }
 
-// deleteSelectedUsers confirms and deletes the given users. Failures on
-// individual users do not stop the remaining deletions; all errors are
-// collected and returned together at the end. Split out from
-// runInteractiveDelete so the deletion/confirmation/error-collection logic
-// can be exercised directly in tests without going through the multi-select
-// prompt.
-func deleteSelectedUsers(cmd *cobra.Command, client *poweradmin.Client, selected []*poweradmin.User) error {
+// deleteSelectedUsers confirms and deletes the given users. In dry-run mode
+// it prints what would be deleted and returns without confirming or making
+// any API calls. Failures on individual users do not stop the remaining
+// deletions; all errors are collected and returned together at the end.
+// Split out from runInteractiveDelete so the deletion/confirmation/
+// error-collection logic can be exercised directly in tests without going
+// through the multi-select prompt.
+func deleteSelectedUsers(cmd *cobra.Command, client *poweradmin.Client, selected []*poweradmin.User, dryRun bool) error {
 	if len(selected) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no users selected, nothing to do")
+		return nil
+	}
+
+	if dryRun {
+		fmt.Fprintf(cmd.OutOrStdout(), "Would delete %d user(s):\n", len(selected))
+		for _, u := range selected {
+			fmt.Fprintf(cmd.OutOrStdout(), "  - %s (id %d)\n", u.Username, u.ID)
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), "No changes made.")
 		return nil
 	}
 
