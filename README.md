@@ -326,6 +326,9 @@ poweradmin users update --id 1 --active=false
 # Delete a user
 poweradmin users delete --name patrick --yes
 
+# Delete a user who still owns zones, handing them over to another user
+poweradmin users delete --name patrick --transfer-to anna --yes
+
 # Delete users interactively (multi-select)
 poweradmin users delete --interactive
 
