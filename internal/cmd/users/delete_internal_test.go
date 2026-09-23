@@ -9,16 +9,16 @@ import (
 	"testing"
 
 	"github.com/contentways/poweradmin-cli/v3/internal/testutil"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 	"github.com/spf13/cobra"
 )
 
 func TestDeleteSelectedUsersAllSucceed(t *testing.T) {
 	var deletedIDs []int
 	mockUser := &testutil.MockUserClient{
-		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+		DeleteFn: func(ctx context.Context, id int, opts poweradmin.UserDeleteOpts) (int, *poweradmin.Response, error) {
 			deletedIDs = append(deletedIDs, id)
-			return nil, nil
+			return 0, nil, nil
 		},
 	}
 	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
@@ -32,7 +32,7 @@ func TestDeleteSelectedUsersAllSucceed(t *testing.T) {
 		{ID: 2, Username: "bob"},
 	}
 
-	err := deleteSelectedUsers(cmd, fx.State.MockClient, selected, false)
+	err := deleteSelectedUsers(cmd, fx.State.MockClient, selected, poweradmin.UserDeleteOpts{}, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -48,11 +48,11 @@ func TestDeleteSelectedUsersAllSucceed(t *testing.T) {
 
 func TestDeleteSelectedUsersPartialFailure(t *testing.T) {
 	mockUser := &testutil.MockUserClient{
-		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+		DeleteFn: func(ctx context.Context, id int, opts poweradmin.UserDeleteOpts) (int, *poweradmin.Response, error) {
 			if id == 2 {
-				return nil, fmt.Errorf("permission denied")
+				return 0, nil, fmt.Errorf("permission denied")
 			}
-			return nil, nil
+			return 0, nil, nil
 		},
 	}
 	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
@@ -67,7 +67,7 @@ func TestDeleteSelectedUsersPartialFailure(t *testing.T) {
 		{ID: 3, Username: "carol"},
 	}
 
-	err := deleteSelectedUsers(cmd, fx.State.MockClient, selected, false)
+	err := deleteSelectedUsers(cmd, fx.State.MockClient, selected, poweradmin.UserDeleteOpts{}, false)
 	if err == nil {
 		t.Fatal("expected error due to partial failure, got nil")
 	}
@@ -90,9 +90,9 @@ func TestDeleteSelectedUsersPartialFailure(t *testing.T) {
 func TestDeleteSelectedUsersEmptySelectionNoOp(t *testing.T) {
 	called := false
 	mockUser := &testutil.MockUserClient{
-		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+		DeleteFn: func(ctx context.Context, id int, opts poweradmin.UserDeleteOpts) (int, *poweradmin.Response, error) {
 			called = true
-			return nil, nil
+			return 0, nil, nil
 		},
 	}
 	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
@@ -100,7 +100,7 @@ func TestDeleteSelectedUsersEmptySelectionNoOp(t *testing.T) {
 	cmd := &cobra.Command{Use: "test"}
 	cmd.SetOut(fx.Stdout)
 
-	err := deleteSelectedUsers(cmd, fx.State.MockClient, nil, false)
+	err := deleteSelectedUsers(cmd, fx.State.MockClient, nil, poweradmin.UserDeleteOpts{}, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -115,9 +115,9 @@ func TestDeleteSelectedUsersEmptySelectionNoOp(t *testing.T) {
 func TestDeleteSelectedUsersDeclineAbortsWithoutDeleting(t *testing.T) {
 	called := false
 	mockUser := &testutil.MockUserClient{
-		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+		DeleteFn: func(ctx context.Context, id int, opts poweradmin.UserDeleteOpts) (int, *poweradmin.Response, error) {
 			called = true
-			return nil, nil
+			return 0, nil, nil
 		},
 	}
 	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
@@ -128,7 +128,7 @@ func TestDeleteSelectedUsersDeclineAbortsWithoutDeleting(t *testing.T) {
 
 	selected := []*poweradmin.User{{ID: 1, Username: "alice"}}
 
-	err := deleteSelectedUsers(cmd, fx.State.MockClient, selected, false)
+	err := deleteSelectedUsers(cmd, fx.State.MockClient, selected, poweradmin.UserDeleteOpts{}, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -143,9 +143,9 @@ func TestDeleteSelectedUsersDeclineAbortsWithoutDeleting(t *testing.T) {
 func TestDeleteSelectedUsersDryRunMakesNoAPICalls(t *testing.T) {
 	called := false
 	mockUser := &testutil.MockUserClient{
-		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+		DeleteFn: func(ctx context.Context, id int, opts poweradmin.UserDeleteOpts) (int, *poweradmin.Response, error) {
 			called = true
-			return nil, nil
+			return 0, nil, nil
 		},
 	}
 	fx := testutil.NewFixtureWithAllMocks(t, nil, nil, mockUser, nil, nil)
@@ -159,7 +159,7 @@ func TestDeleteSelectedUsersDryRunMakesNoAPICalls(t *testing.T) {
 		{ID: 2, Username: "bob"},
 	}
 
-	err := deleteSelectedUsers(cmd, fx.State.MockClient, selected, true)
+	err := deleteSelectedUsers(cmd, fx.State.MockClient, selected, poweradmin.UserDeleteOpts{}, true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

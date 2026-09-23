@@ -6,11 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/contentways/poweradmin-cli/v3/internal/cmd/base"
 	"github.com/contentways/poweradmin-cli/v3/internal/output"
 	"github.com/contentways/poweradmin-cli/v3/internal/state"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 	"github.com/spf13/cobra"
 )
 
@@ -161,12 +162,13 @@ func deleteSelectedZones(cmd *cobra.Command, client *poweradmin.Client, selected
 		return nil
 	}
 
-	summary := fmt.Sprintf("The following %d zone(s) will be deleted:\n", len(selected))
+	var summary strings.Builder
+	summary.WriteString(fmt.Sprintf("The following %d zone(s) will be deleted:\n", len(selected)))
 	for _, z := range selected {
-		summary += fmt.Sprintf("  - %s (id %d)\n", z.Name, z.ID)
+		summary.WriteString(fmt.Sprintf("  - %s (id %d)\n", z.Name, z.ID))
 	}
-	summary += "\nProceed? [y/N] "
-	if !base.Confirm(cmd, summary) {
+	summary.WriteString("\nProceed? [y/N] ")
+	if !base.Confirm(cmd, summary.String()) {
 		return nil
 	}
 

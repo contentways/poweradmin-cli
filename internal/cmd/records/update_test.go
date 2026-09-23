@@ -10,7 +10,7 @@ import (
 
 	"github.com/contentways/poweradmin-cli/v3/internal/cmd/records"
 	"github.com/contentways/poweradmin-cli/v3/internal/testutil"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 )
 
 func TestRecordsUpdate(t *testing.T) {
@@ -110,7 +110,7 @@ func TestRecordsUpdateByZoneID(t *testing.T) {
 			if zoneID != 9 {
 				t.Errorf("expected zoneID 9, got %d", zoneID)
 			}
-			return &poweradmin.Record{ID: recordID, Name: "www.example.com", Type: "A", Content: opts.Content}, nil, nil
+			return &poweradmin.Record{ID: recordID, Name: "www.example.com", Type: "A", Content: *opts.Content}, nil, nil
 		},
 	}
 	fx := testutil.NewFixtureWithAllMocks(t, &testutil.MockZoneClient{}, mockRecord, nil, nil, nil)

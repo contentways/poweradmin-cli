@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/contentways/poweradmin-cli/v3/internal/schema"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 )
 
 func TestGroupFromSDK(t *testing.T) {

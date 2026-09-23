@@ -10,7 +10,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 )
 
 // State holds the global runtime configuration for the CLI.

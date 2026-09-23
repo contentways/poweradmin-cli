@@ -5,7 +5,7 @@ package testutil
 import (
 	"context"
 
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 )
 
 // MockZoneClient implements poweradmin.IZoneClient for testing.

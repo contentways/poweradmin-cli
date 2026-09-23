@@ -5,7 +5,7 @@ package testutil
 import (
 	"context"
 
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 )
 
 // MockUserClient implements poweradmin.IUserClient for testing.
@@ -18,7 +18,7 @@ type MockUserClient struct {
 	AllFn                   func(ctx context.Context) ([]*poweradmin.User, error)
 	CreateFn                func(ctx context.Context, opts poweradmin.UserCreateOpts) (int, *poweradmin.Response, error)
 	UpdateFn                func(ctx context.Context, id int, opts poweradmin.UserUpdateOpts) (*poweradmin.User, *poweradmin.Response, error)
-	DeleteFn                func(ctx context.Context, id int) (*poweradmin.Response, error)
+	DeleteFn                func(ctx context.Context, id int, opts poweradmin.UserDeleteOpts) (int, *poweradmin.Response, error)
 	SetPermissionTemplateFn func(ctx context.Context, id, permTemplID int) (*poweradmin.Response, error)
 }
 
@@ -64,11 +64,11 @@ func (m *MockUserClient) Update(ctx context.Context, id int, opts poweradmin.Use
 	return nil, nil, nil
 }
 
-func (m *MockUserClient) Delete(ctx context.Context, id int) (*poweradmin.Response, error) {
+func (m *MockUserClient) Delete(ctx context.Context, id int, opts poweradmin.UserDeleteOpts) (int, *poweradmin.Response, error) {
 	if m.DeleteFn != nil {
-		return m.DeleteFn(ctx, id)
+		return m.DeleteFn(ctx, id, opts)
 	}
-	return nil, nil
+	return 0, nil, nil
 }
 
 func (m *MockUserClient) SetPermissionTemplate(ctx context.Context, id, permTemplID int) (*poweradmin.Response, error) {

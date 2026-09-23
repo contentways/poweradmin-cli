@@ -78,8 +78,8 @@ func NewExportCmd(s *state.State) *cobra.Command {
 				recName := r.Name
 				if recName == zone.Name {
 					recName = "@"
-				} else if strings.HasSuffix(recName, "."+zone.Name) {
-					recName = strings.TrimSuffix(recName, "."+zone.Name)
+				} else if before, ok := strings.CutSuffix(recName, "."+zone.Name); ok {
+					recName = before
 				}
 
 				fmt.Fprintf(w, "%-30s %-6d IN  %-6s %s\n", recName, r.TTL, r.Type, r.Content)
