@@ -5,11 +5,12 @@ package records
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/contentways/poweradmin-cli/v3/internal/cmd/base"
 	"github.com/contentways/poweradmin-cli/v3/internal/output"
 	"github.com/contentways/poweradmin-cli/v3/internal/state"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 	"github.com/spf13/cobra"
 )
 
@@ -190,12 +191,13 @@ func deleteSelectedRecords(cmd *cobra.Command, client *poweradmin.Client, zoneID
 		return nil
 	}
 
-	summary := fmt.Sprintf("The following %d record(s) will be deleted:\n", len(selected))
+	var summary strings.Builder
+	fmt.Fprintf(&summary, "The following %d record(s) will be deleted:\n", len(selected))
 	for _, r := range selected {
-		summary += fmt.Sprintf("  - %s %s %s (id %s)\n", r.Name, r.Type, r.Content, r.ID)
+		fmt.Fprintf(&summary, "  - %s %s %s (id %s)\n", r.Name, r.Type, r.Content, r.ID)
 	}
-	summary += "\nProceed? [y/N] "
-	if !base.Confirm(cmd, summary) {
+	summary.WriteString("\nProceed? [y/N] ")
+	if !base.Confirm(cmd, summary.String()) {
 		return nil
 	}
 

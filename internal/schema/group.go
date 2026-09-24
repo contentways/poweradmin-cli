@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 package schema
 
-import "github.com/contentways/poweradmin-go/v3/poweradmin"
+import "github.com/contentways/poweradmin-go/v4/poweradmin"
 
 // Group is the CLI output schema for a Poweradmin group.
 type Group struct {

@@ -5,6 +5,7 @@ package base
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -27,9 +28,45 @@ func isAccessible() bool {
 
 // runForm runs a single-field huh form, honoring accessible mode.
 func runForm(field huh.Field) error {
-	return huh.NewForm(huh.NewGroup(field)).
-		WithAccessible(isAccessible()).
-		Run()
+	form := huh.NewForm(huh.NewGroup(field))
+	if isAccessible() {
+		// huh's accessible prompts wrap their input in a fresh bufio.Scanner
+		// per prompt. Reading os.Stdin directly lets one prompt swallow the
+		// lines meant for the following prompts whenever several lines are
+		// already waiting in the pipe. lineReader hands out one line per Read
+		// so every prompt consumes exactly its own line.
+		form = form.WithAccessible(true).WithInput(lineReader{r: os.Stdin})
+	}
+	return form.Run()
+}
+
+// lineReader returns at most one line per Read call. It reads byte by byte
+// and keeps no buffer, so nothing is lost between successive readers of the
+// same underlying stream.
+type lineReader struct {
+	r io.Reader
+}
+
+func (l lineReader) Read(p []byte) (int, error) {
+	var b [1]byte
+	n := 0
+	for n < len(p) {
+		m, err := l.r.Read(b[:])
+		if m == 1 {
+			p[n] = b[0]
+			n++
+			if b[0] == '\n' {
+				return n, nil
+			}
+		}
+		if err != nil {
+			if n > 0 {
+				return n, nil
+			}
+			return 0, err
+		}
+	}
+	return n, nil
 }
 
 // PromptString interactively asks the user for a single string value.

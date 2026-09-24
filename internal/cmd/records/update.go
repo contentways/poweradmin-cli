@@ -10,7 +10,7 @@ import (
 	"github.com/contentways/poweradmin-cli/v3/internal/output"
 	"github.com/contentways/poweradmin-cli/v3/internal/schema"
 	"github.com/contentways/poweradmin-cli/v3/internal/state"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 	"github.com/spf13/cobra"
 )
 
@@ -67,13 +67,16 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 			// Build update opts — only include fields that were explicitly set.
 			opts := poweradmin.RecordUpdateOpts{}
 			if cmd.Flags().Changed("name") {
-				opts.Name, _ = cmd.Flags().GetString("name")
+				name, _ := cmd.Flags().GetString("name")
+				opts.Name = &name
 			}
 			if cmd.Flags().Changed("type") {
-				opts.Type, _ = cmd.Flags().GetString("type")
+				recordType, _ := cmd.Flags().GetString("type")
+				opts.Type = &recordType
 			}
 			if cmd.Flags().Changed("content") {
-				opts.Content, _ = cmd.Flags().GetString("content")
+				content, _ := cmd.Flags().GetString("content")
+				opts.Content = &content
 			}
 			if cmd.Flags().Changed("ttl") {
 				ttl, _ := cmd.Flags().GetInt("ttl")

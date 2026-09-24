@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/contentways/poweradmin-cli/v3/internal/testutil"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 )
 
 func TestMockUserClientUnsetFieldsReturnZeroValues(t *testing.T) {
@@ -32,8 +32,8 @@ func TestMockUserClientUnsetFieldsReturnZeroValues(t *testing.T) {
 	if u, resp, err := m.Update(ctx, 1, poweradmin.UserUpdateOpts{}); u != nil || resp != nil || err != nil {
 		t.Errorf("Update: expected all nil, got %v, %v, %v", u, resp, err)
 	}
-	if resp, err := m.Delete(ctx, 1); resp != nil || err != nil {
-		t.Errorf("Delete: expected all nil, got %v, %v", resp, err)
+	if n, resp, err := m.Delete(ctx, 1, poweradmin.UserDeleteOpts{}); n != 0 || resp != nil || err != nil {
+		t.Errorf("Delete: expected zero values, got %v, %v, %v", n, resp, err)
 	}
 	if resp, err := m.SetPermissionTemplate(ctx, 1, 2); resp != nil || err != nil {
 		t.Errorf("SetPermissionTemplate: expected all nil, got %v, %v", resp, err)
@@ -67,9 +67,9 @@ func TestMockUserClientSetFieldsDelegate(t *testing.T) {
 			calls = append(calls, "Update")
 			return &poweradmin.User{ID: id}, nil, nil
 		},
-		DeleteFn: func(ctx context.Context, id int) (*poweradmin.Response, error) {
+		DeleteFn: func(ctx context.Context, id int, opts poweradmin.UserDeleteOpts) (int, *poweradmin.Response, error) {
 			calls = append(calls, "Delete")
-			return nil, nil
+			return 0, nil, nil
 		},
 		SetPermissionTemplateFn: func(ctx context.Context, id, permTemplID int) (*poweradmin.Response, error) {
 			calls = append(calls, "SetPermissionTemplate")
@@ -84,7 +84,7 @@ func TestMockUserClientSetFieldsDelegate(t *testing.T) {
 	_, _ = m.All(ctx)
 	_, _, _ = m.Create(ctx, poweradmin.UserCreateOpts{})
 	_, _, _ = m.Update(ctx, 1, poweradmin.UserUpdateOpts{})
-	_, _ = m.Delete(ctx, 1)
+	_, _, _ = m.Delete(ctx, 1, poweradmin.UserDeleteOpts{})
 	_, _ = m.SetPermissionTemplate(ctx, 1, 2)
 
 	want := []string{"GetByName", "GetByID", "List", "All", "Create", "Update", "Delete", "SetPermissionTemplate"}

@@ -11,7 +11,7 @@ import (
 
 	"github.com/contentways/poweradmin-cli/v3/internal/cmd/base"
 	"github.com/contentways/poweradmin-cli/v3/internal/state"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 	"github.com/spf13/cobra"
 )
 

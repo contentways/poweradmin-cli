@@ -5,11 +5,13 @@ package users
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/contentways/poweradmin-cli/v3/internal/cmd/base"
 	"github.com/contentways/poweradmin-cli/v3/internal/output"
 	"github.com/contentways/poweradmin-cli/v3/internal/state"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +20,10 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a user",
-		Long:  `Delete a Poweradmin user by username or numeric ID.`,
+		Long: `Delete a Poweradmin user by username or numeric ID.
+
+Poweradmin refuses to delete a user who still owns zones. Use --transfer-to
+(username or numeric ID) to hand those zones over to another user.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s := state.FromContext(cmd.Context())
 
@@ -30,9 +35,14 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 				return fmt.Errorf("failed to create client: %w", err)
 			}
 
+			deleteOpts, err := resolveDeleteOpts(cmd, client)
+			if err != nil {
+				return err
+			}
+
 			if interactive {
 				base.PrintPreviewNotice(cmd)
-				return runInteractiveDelete(cmd, client, dryRun)
+				return runInteractiveDelete(cmd, client, deleteOpts, dryRun)
 			}
 
 			name, _ := cmd.Flags().GetString("name")
@@ -56,7 +66,7 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 				return nil
 			}
 
-			_, err = client.User.Delete(cmd.Context(), user.ID)
+			transferred, _, err := client.User.Delete(cmd.Context(), user.ID, deleteOpts)
 			if err != nil {
 				return fmt.Errorf("failed to delete user: %w", err)
 			}
@@ -70,18 +80,20 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 
 			if outputFmt.IsStructured() {
 				return base.PrintFormatted(cmd, outputFmt, map[string]any{
-					"id":       user.ID,
-					"username": user.Username,
+					"id":                user.ID,
+					"username":          user.Username,
+					"zones_transferred": transferred,
 				})
 			}
 
-			fmt.Fprintf(cmd.OutOrStdout(), "deleted user %s (id %d)\n", user.Username, user.ID)
+			fmt.Fprintf(cmd.OutOrStdout(), "deleted user %s (id %d)%s\n", user.Username, user.ID, transferSuffix(transferred))
 			return nil
 		},
 	}
 
 	cmd.Flags().String("name", "", "Username to identify the user")
 	cmd.Flags().String("id", "", "User ID to identify the user")
+	cmd.Flags().String("transfer-to", "", "Username or ID of the user who receives the deleted user's zones")
 	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|json|yaml")
 	cmd.Flags().BoolP("yes", "y", false, "Skip confirmation prompt")
 	cmd.Flags().BoolP("quiet", "q", false, "Suppress output after deletion")
@@ -89,12 +101,13 @@ func NewDeleteCmd(s *state.State) *cobra.Command {
 	cmd.Flags().Bool("dry-run", false, "Show what would be deleted without making changes")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.UserNameCompletion(s))
+	cmd.RegisterFlagCompletionFunc("transfer-to", base.UserNameCompletion(s))
 	return cmd
 }
 
 // runInteractiveDelete lists all users, lets the user pick zero or more via
 // a multi-select prompt, then hands off to deleteSelectedUsers.
-func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, dryRun bool) error {
+func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, opts poweradmin.UserDeleteOpts, dryRun bool) error {
 	usrs, err := client.User.All(cmd.Context())
 	if err != nil {
 		return fmt.Errorf("failed to list users: %w", err)
@@ -122,7 +135,31 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, dryRun 
 		selected = append(selected, byLabel[label])
 	}
 
-	return deleteSelectedUsers(cmd, client, selected, dryRun)
+	return deleteSelectedUsers(cmd, client, selected, opts, dryRun)
+}
+
+// resolveDeleteOpts turns the --transfer-to flag (username or numeric ID)
+// into UserDeleteOpts.
+func resolveDeleteOpts(cmd *cobra.Command, client *poweradmin.Client) (poweradmin.UserDeleteOpts, error) {
+	target, _ := cmd.Flags().GetString("transfer-to")
+	if target == "" {
+		return poweradmin.UserDeleteOpts{}, nil
+	}
+	if id, err := strconv.Atoi(target); err == nil {
+		return poweradmin.UserDeleteOpts{TransferToUserID: &id}, nil
+	}
+	user, _, err := client.User.GetByName(cmd.Context(), target)
+	if err != nil {
+		return poweradmin.UserDeleteOpts{}, fmt.Errorf("failed to resolve --transfer-to %q: %w", target, err)
+	}
+	return poweradmin.UserDeleteOpts{TransferToUserID: &user.ID}, nil
+}
+
+func transferSuffix(n int) string {
+	if n == 0 {
+		return ""
+	}
+	return fmt.Sprintf(", %d zone(s) transferred", n)
 }
 
 // deleteSelectedUsers confirms and deletes the given users. In dry-run mode
@@ -132,7 +169,7 @@ func runInteractiveDelete(cmd *cobra.Command, client *poweradmin.Client, dryRun 
 // Split out from runInteractiveDelete so the deletion/confirmation/
 // error-collection logic can be exercised directly in tests without going
 // through the multi-select prompt.
-func deleteSelectedUsers(cmd *cobra.Command, client *poweradmin.Client, selected []*poweradmin.User, dryRun bool) error {
+func deleteSelectedUsers(cmd *cobra.Command, client *poweradmin.Client, selected []*poweradmin.User, opts poweradmin.UserDeleteOpts, dryRun bool) error {
 	if len(selected) == 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "no users selected, nothing to do")
 		return nil
@@ -147,23 +184,25 @@ func deleteSelectedUsers(cmd *cobra.Command, client *poweradmin.Client, selected
 		return nil
 	}
 
-	summary := fmt.Sprintf("The following %d user(s) will be deleted:\n", len(selected))
+	var summary strings.Builder
+	fmt.Fprintf(&summary, "The following %d user(s) will be deleted:\n", len(selected))
 	for _, u := range selected {
-		summary += fmt.Sprintf("  - %s (id %d)\n", u.Username, u.ID)
+		fmt.Fprintf(&summary, "  - %s (id %d)\n", u.Username, u.ID)
 	}
-	summary += "\nProceed? [y/N] "
-	if !base.Confirm(cmd, summary) {
+	summary.WriteString("\nProceed? [y/N] ")
+	if !base.Confirm(cmd, summary.String()) {
 		return nil
 	}
 
 	var errs []error
 	for _, u := range selected {
-		if _, err := client.User.Delete(cmd.Context(), u.ID); err != nil {
+		transferred, _, err := client.User.Delete(cmd.Context(), u.ID, opts)
+		if err != nil {
 			fmt.Fprintf(cmd.OutOrStdout(), "failed to delete user %s (id %d): %s\n", u.Username, u.ID, err)
 			errs = append(errs, fmt.Errorf("user %s: %w", u.Username, err))
 			continue
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "deleted user %s (id %d)\n", u.Username, u.ID)
+		fmt.Fprintf(cmd.OutOrStdout(), "deleted user %s (id %d)%s\n", u.Username, u.ID, transferSuffix(transferred))
 	}
 
 	if len(errs) > 0 {

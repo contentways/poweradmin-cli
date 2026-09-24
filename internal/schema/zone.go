@@ -6,29 +6,29 @@
 // with snake_case keys, omitted empty fields and a consistent structure.
 package schema
 
-import "github.com/contentways/poweradmin-go/v3/poweradmin"
+import "github.com/contentways/poweradmin-go/v4/poweradmin"
 
 // Zone is the CLI output schema for a DNS zone.
 type Zone struct {
-	ID           int    `json:"id" yaml:"id"`
-	Name         string `json:"name" yaml:"name"`
-	Type         string `json:"type" yaml:"type"`
-	Masters      string `json:"masters,omitempty" yaml:"masters,omitempty"`
-	Description  string `json:"description,omitempty" yaml:"description,omitempty"`
-	SOASerial    int    `json:"soa_serial,omitempty" yaml:"soa_serial,omitempty"`
-	DNSSECSigned bool   `json:"dnssec_signed,omitempty" yaml:"dnssec_signed,omitempty"`
+	ID          int    `json:"id" yaml:"id"`
+	Name        string `json:"name" yaml:"name"`
+	Type        string `json:"type" yaml:"type"`
+	Masters     string `json:"masters,omitempty" yaml:"masters,omitempty"`
+	Account     string `json:"account,omitempty" yaml:"account,omitempty"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+	CreatedAt   string `json:"created_at,omitempty" yaml:"created_at,omitempty"`
 }
 
 // ZoneFromSDK converts a poweradmin SDK Zone to the CLI output schema.
 func ZoneFromSDK(z *poweradmin.Zone) Zone {
 	return Zone{
-		ID:           z.ID,
-		Name:         z.Name,
-		Type:         string(z.Type),
-		Masters:      z.Masters,
-		Description:  z.Description,
-		SOASerial:    z.SOASerial,
-		DNSSECSigned: z.DNSSECSigned,
+		ID:          z.ID,
+		Name:        z.Name,
+		Type:        string(z.Type),
+		Masters:     z.Masters,
+		Account:     z.Account,
+		Description: z.Description,
+		CreatedAt:   z.CreatedAt,
 	}
 }
 

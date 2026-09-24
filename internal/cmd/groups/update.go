@@ -9,7 +9,7 @@ import (
 	"github.com/contentways/poweradmin-cli/v3/internal/output"
 	"github.com/contentways/poweradmin-cli/v3/internal/schema"
 	"github.com/contentways/poweradmin-cli/v3/internal/state"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 	"github.com/spf13/cobra"
 )
 
@@ -40,7 +40,8 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 
 			opts := poweradmin.GroupUpdateOpts{}
 			if cmd.Flags().Changed("new-name") {
-				opts.Name, _ = cmd.Flags().GetString("new-name")
+				newName, _ := cmd.Flags().GetString("new-name")
+				opts.Name = &newName
 			}
 			if cmd.Flags().Changed("description") {
 				desc, _ := cmd.Flags().GetString("description")

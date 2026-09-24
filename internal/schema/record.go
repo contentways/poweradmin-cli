@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 package schema
 
-import "github.com/contentways/poweradmin-go/v3/poweradmin"
+import "github.com/contentways/poweradmin-go/v4/poweradmin"
 
 // Record is the CLI output schema for a DNS record.
 type Record struct {

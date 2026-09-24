@@ -9,7 +9,7 @@ import (
 	"github.com/contentways/poweradmin-cli/v3/internal/output"
 	"github.com/contentways/poweradmin-cli/v3/internal/schema"
 	"github.com/contentways/poweradmin-cli/v3/internal/state"
-	"github.com/contentways/poweradmin-go/v3/poweradmin"
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
 	"github.com/spf13/cobra"
 )
 
@@ -40,13 +40,16 @@ func NewUpdateCmd(s *state.State) *cobra.Command {
 
 			opts := poweradmin.UserUpdateOpts{}
 			if cmd.Flags().Changed("email") {
-				opts.Email, _ = cmd.Flags().GetString("email")
+				email, _ := cmd.Flags().GetString("email")
+				opts.Email = &email
 			}
 			if cmd.Flags().Changed("fullname") {
-				opts.Fullname, _ = cmd.Flags().GetString("fullname")
+				fullname, _ := cmd.Flags().GetString("fullname")
+				opts.Fullname = &fullname
 			}
 			if cmd.Flags().Changed("password") {
-				opts.Password, _ = cmd.Flags().GetString("password")
+				password, _ := cmd.Flags().GetString("password")
+				opts.Password = &password
 			}
 			if cmd.Flags().Changed("active") {
 				active, _ := cmd.Flags().GetBool("active")
