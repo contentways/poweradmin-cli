@@ -176,3 +176,22 @@ func TestPrintPreviewNotice(t *testing.T) {
 		t.Errorf("expected preview notice on stderr, got:\n%s", buf.String())
 	}
 }
+
+// All answers are available before the first prompt reads. Without
+// lineReader the first prompt's scanner would swallow the whole input.
+func TestPromptsConsumeOneLineEachWithBufferedInput(t *testing.T) {
+	testutil.WithAccessiblePrompts(t)
+	testutil.WithStdin(t, "example.com\n3600\n")
+
+	name, err := base.PromptString("Zone name", "", true)
+	if err != nil {
+		t.Fatalf("PromptString: %v", err)
+	}
+	ttl, err := base.PromptInt("TTL", "", 0)
+	if err != nil {
+		t.Fatalf("PromptInt: %v", err)
+	}
+	if name != "example.com" || ttl != 3600 {
+		t.Errorf("name = %q, ttl = %d; want example.com, 3600", name, ttl)
+	}
+}
