@@ -1,5 +1,15 @@
 # Changelog
 
+## [v3.5.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.5.0)
+
+### Features
+
+- migrate to poweradmin-go v4
+
+### Bug Fixes
+
+- feed accessible prompts one line at a time
+
 ## [v3.4.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.4.0)
 
 ### Features
