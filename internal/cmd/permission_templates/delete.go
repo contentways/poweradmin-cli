@@ -167,9 +167,9 @@ func deleteSelectedTemplates(cmd *cobra.Command, client *poweradmin.Client, sele
 	}
 
 	var summary strings.Builder
-	summary.WriteString(fmt.Sprintf("The following %d permission template(s) will be deleted:\n", len(selected)))
+	fmt.Fprintf(&summary, "The following %d permission template(s) will be deleted:\n", len(selected))
 	for _, t := range selected {
-		summary.WriteString(fmt.Sprintf("  - %s (id %d)\n", t.Name, t.ID))
+		fmt.Fprintf(&summary, "  - %s (id %d)\n", t.Name, t.ID)
 	}
 	summary.WriteString("\nProceed? [y/N] ")
 	if !base.Confirm(cmd, summary.String()) {

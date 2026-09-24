@@ -148,9 +148,9 @@ func deleteSelectedGroups(cmd *cobra.Command, client *poweradmin.Client, selecte
 	}
 
 	var summary strings.Builder
-	summary.WriteString(fmt.Sprintf("The following %d group(s) will be deleted:\n", len(selected)))
+	fmt.Fprintf(&summary, "The following %d group(s) will be deleted:\n", len(selected))
 	for _, g := range selected {
-		summary.WriteString(fmt.Sprintf("  - %s (id %d)\n", g.Name, g.ID))
+		fmt.Fprintf(&summary, "  - %s (id %d)\n", g.Name, g.ID)
 	}
 	summary.WriteString("\nProceed? [y/N] ")
 	if !base.Confirm(cmd, summary.String()) {

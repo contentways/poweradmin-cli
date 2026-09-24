@@ -185,9 +185,9 @@ func deleteSelectedUsers(cmd *cobra.Command, client *poweradmin.Client, selected
 	}
 
 	var summary strings.Builder
-	summary.WriteString(fmt.Sprintf("The following %d user(s) will be deleted:\n", len(selected)))
+	fmt.Fprintf(&summary, "The following %d user(s) will be deleted:\n", len(selected))
 	for _, u := range selected {
-		summary.WriteString(fmt.Sprintf("  - %s (id %d)\n", u.Username, u.ID))
+		fmt.Fprintf(&summary, "  - %s (id %d)\n", u.Username, u.ID)
 	}
 	summary.WriteString("\nProceed? [y/N] ")
 	if !base.Confirm(cmd, summary.String()) {

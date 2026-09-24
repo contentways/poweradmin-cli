@@ -192,9 +192,9 @@ func deleteSelectedRecords(cmd *cobra.Command, client *poweradmin.Client, zoneID
 	}
 
 	var summary strings.Builder
-	summary.WriteString(fmt.Sprintf("The following %d record(s) will be deleted:\n", len(selected)))
+	fmt.Fprintf(&summary, "The following %d record(s) will be deleted:\n", len(selected))
 	for _, r := range selected {
-		summary.WriteString(fmt.Sprintf("  - %s %s %s (id %s)\n", r.Name, r.Type, r.Content, r.ID))
+		fmt.Fprintf(&summary, "  - %s %s %s (id %s)\n", r.Name, r.Type, r.Content, r.ID)
 	}
 	summary.WriteString("\nProceed? [y/N] ")
 	if !base.Confirm(cmd, summary.String()) {
