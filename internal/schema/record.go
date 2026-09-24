@@ -2,17 +2,34 @@
 // SPDX-License-Identifier: MIT
 package schema
 
-import "github.com/contentways/poweradmin-go/v4/poweradmin"
+import (
+	"strings"
+
+	"github.com/contentways/poweradmin-go/v4/poweradmin"
+)
 
 // Record is the CLI output schema for a DNS record.
 type Record struct {
-	ID       string `json:"id" yaml:"id"`
-	Name     string `json:"name" yaml:"name"`
-	Type     string `json:"type" yaml:"type"`
-	Content  string `json:"content" yaml:"content"`
-	TTL      int    `json:"ttl" yaml:"ttl"`
-	Priority int    `json:"priority,omitempty" yaml:"priority,omitempty"`
-	Disabled bool   `json:"disabled,omitempty" yaml:"disabled,omitempty"`
+	ID      string `json:"id" yaml:"id"`
+	Name    string `json:"name" yaml:"name"`
+	Type    string `json:"type" yaml:"type"`
+	Content string `json:"content" yaml:"content"`
+	TTL     int    `json:"ttl" yaml:"ttl"`
+	// Priority is set for record types that carry one (see HasPriority),
+	// including a priority of 0, and omitted for all other types.
+	Priority *int `json:"priority,omitempty" yaml:"priority,omitempty"`
+	Disabled bool `json:"disabled,omitempty" yaml:"disabled,omitempty"`
+}
+
+// HasPriority reports whether records of the given type carry a priority
+// that PowerDNS stores separately from the content (MX and SRV).
+func HasPriority(recordType string) bool {
+	switch strings.ToUpper(recordType) {
+	case "MX", "SRV":
+		return true
+	default:
+		return false
+	}
 }
 
 // RecordFromSDK converts a poweradmin SDK Record to the CLI output schema.
@@ -23,9 +40,17 @@ func RecordFromSDK(r *poweradmin.Record) Record {
 		Type:     r.Type,
 		Content:  r.Content,
 		TTL:      r.TTL,
-		Priority: r.Priority,
+		Priority: priorityOf(r),
 		Disabled: r.Disabled,
 	}
+}
+
+func priorityOf(r *poweradmin.Record) *int {
+	if !HasPriority(r.Type) {
+		return nil
+	}
+	p := r.Priority
+	return &p
 }
 
 // RecordList wraps a slice of records in a root object for JSON output.

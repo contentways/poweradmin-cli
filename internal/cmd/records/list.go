@@ -54,6 +54,8 @@ func NewListCmd(s *state.State) *cobra.Command {
 						return records[i].Type < records[j].Type
 					case "ttl":
 						return records[i].TTL < records[j].TTL
+					case "prio":
+						return records[i].Priority < records[j].Priority
 					default: // name
 						return records[i].Name < records[j].Name
 					}
@@ -78,18 +80,25 @@ func NewListCmd(s *state.State) *cobra.Command {
 				return base.PrintFormatted(cmd, outputFmt, schema.RecordListFromSDK(records))
 			}
 
+			// CONTENT is the last column: tabwriter does not pad the final
+			// column, so a long TXT record cannot widen every other row.
 			t := base.NewTable(cmd)
-			t.AddHeader("NAME", "TYPE", "CONTENT", "TTL")
+			t.AddHeader("NAME", "TYPE", "TTL", "PRIO", "CONTENT")
 			for _, r := range records {
 				content := r.Content
 				if outputFmt == output.FormatTable {
-					content = output.Truncate(content, 50)
+					content = output.Truncate(content, 80)
+				}
+				prio := ""
+				if schema.HasPriority(r.Type) {
+					prio = strconv.Itoa(r.Priority)
 				}
 				t.AddColoredRow(
 					output.PlainCell(r.Name),
 					output.Cell(r.Type, output.CyanCode()),
-					output.PlainCell(content),
 					output.PlainCell(strconv.Itoa(r.TTL)),
+					output.PlainCell(prio),
+					output.PlainCell(content),
 				)
 			}
 			t.Flush()
@@ -102,7 +111,7 @@ func NewListCmd(s *state.State) *cobra.Command {
 	cmd.Flags().String("type", "", "Filter by record type (e.g. A, AAAA, MX, TXT)")
 	cmd.Flags().StringP("output", "o", "table", "Output format. One of: table|full|json|yaml")
 	cmd.Flags().Bool("no-header", false, "Suppress table header row")
-	cmd.Flags().String("sort", "", "Sort by field. One of: name|type|ttl")
+	cmd.Flags().String("sort", "", "Sort by field. One of: name|type|ttl|prio")
 	// Register shell completion for --name flag.
 	cmd.RegisterFlagCompletionFunc("name", base.ZoneNameCompletion(s))
 	return cmd

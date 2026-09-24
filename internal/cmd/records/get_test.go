@@ -149,3 +149,36 @@ func TestRecordsGetByZoneID(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+// A priority of 0 is meaningful for MX/SRV and must be shown; types without
+// a priority must not show the line at all.
+func TestRecordsGetPriority(t *testing.T) {
+	for _, tc := range []struct {
+		rec  poweradmin.Record
+		want bool
+	}{
+		{poweradmin.Record{ID: "r1", Name: "_imaps._tcp.example.com", Type: "SRV", Content: "1 993 mail.example.com", TTL: 60}, true},
+		{poweradmin.Record{ID: "r1", Name: "www.example.com", Type: "A", Content: "192.0.2.1", TTL: 60}, false},
+	} {
+		t.Run(tc.rec.Type, func(t *testing.T) {
+			rec := tc.rec
+			mockZone := &testutil.MockZoneClient{
+				GetByNameFn: func(ctx context.Context, name string) (*poweradmin.Zone, *poweradmin.Response, error) {
+					return &poweradmin.Zone{ID: 1, Name: name}, nil, nil
+				},
+			}
+			mockRecord := &testutil.MockRecordClient{
+				AllFn: func(ctx context.Context, zoneID int) ([]*poweradmin.Record, error) {
+					return []*poweradmin.Record{&rec}, nil
+				},
+			}
+			fx := testutil.NewFixtureWithAllMocks(t, mockZone, mockRecord, nil, nil, nil)
+			if err := fx.Run(records.NewGetCmd(nil), []string{"--zone-name", "example.com", "--id", "r1"}); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got := strings.Contains(fx.Stdout.String(), "Priority: 0"); got != tc.want {
+				t.Errorf("Priority line shown = %v, want %v\n%s", got, tc.want, fx.Stdout.String())
+			}
+		})
+	}
+}

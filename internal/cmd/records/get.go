@@ -81,7 +81,7 @@ func NewGetCmd(s *state.State) *cobra.Command {
 			fmt.Fprintf(cmd.OutOrStdout(), "Type:     %s\n", output.Cyan(record.Type))
 			fmt.Fprintf(cmd.OutOrStdout(), "Content:  %s\n", record.Content)
 			fmt.Fprintf(cmd.OutOrStdout(), "TTL:      %d\n", record.TTL)
-			if record.Priority > 0 {
+			if schema.HasPriority(record.Type) {
 				fmt.Fprintf(cmd.OutOrStdout(), "Priority: %d\n", record.Priority)
 			}
 			return nil
