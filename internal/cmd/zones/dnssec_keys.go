@@ -38,8 +38,10 @@ func activeLabel(active bool) string {
 	return "no"
 }
 
-// printKey writes a single key in the format chosen with --output.
-func printKey(cmd *cobra.Command, message string, k *poweradmin.DNSSECKey) error {
+// printKey writes a single key in the format chosen with --output. In table
+// output the headline (e.g. "added key 2 to example.com") is followed by the
+// key details and its DS records.
+func printKey(cmd *cobra.Command, headline string, k *poweradmin.DNSSECKey) error {
 	outputStr, _ := cmd.Flags().GetString("output")
 	outputFmt := output.ParseFormat(outputStr)
 	if outputFmt.IsStructured() {
@@ -54,8 +56,8 @@ func printKey(cmd *cobra.Command, message string, k *poweradmin.DNSSECKey) error
 	if algorithm == "" {
 		algorithm = fmt.Sprintf("algorithm %d", k.AlgorithmID)
 	}
-	fmt.Fprintf(out, "%s: key %d (%s, keytag %d, %s, %d bits, active: %s)\n",
-		message, k.ID, strings.ToUpper(string(k.Type)), k.KeyTag, algorithm, k.Bits, activeLabel(k.Active))
+	fmt.Fprintf(out, "%s (%s, keytag %d, %s, %d bits, active: %s)\n",
+		headline, strings.ToUpper(string(k.Type)), k.KeyTag, algorithm, k.Bits, activeLabel(k.Active))
 	for _, ds := range k.DS {
 		fmt.Fprintf(out, "  DS %s\n", ds)
 	}
@@ -165,7 +167,7 @@ requires 256 bits and the RSA algorithms 1024 or 2048 bits.`,
 			if err != nil {
 				return fmt.Errorf("failed to add DNSSEC key: %w", err)
 			}
-			return printKey(cmd, "added "+zone.Name, k)
+			return printKey(cmd, fmt.Sprintf("added key %d to %s", k.ID, zone.Name), k)
 		},
 	}
 
@@ -209,7 +211,7 @@ func newDNSSECKeySetActiveCmd(s *state.State, active bool) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("failed to %s DNSSEC key: %w", use, err)
 			}
-			return printKey(cmd, verb+" in "+zone.Name, k)
+			return printKey(cmd, fmt.Sprintf("%s key %d in %s", verb, k.ID, zone.Name), k)
 		},
 	}
 

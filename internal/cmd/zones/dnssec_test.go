@@ -200,7 +200,7 @@ func TestZonesDNSSECKeysAdd(t *testing.T) {
 		t.Errorf("opts = %+v, want %+v", gotOpts, want)
 	}
 	out := fx.Stdout.String()
-	if !strings.Contains(out, "key 3") || !strings.Contains(out, "DS 46395 13 2 3dd8ee7d") {
+	if !strings.Contains(out, "added key 3 to example.com (CSK, keytag 46395") || !strings.Contains(out, "DS 46395 13 2 3dd8ee7d") {
 		t.Errorf("unexpected output:\n%s", out)
 	}
 }
@@ -258,7 +258,9 @@ func TestZonesDNSSECKeysActivateDeactivate(t *testing.T) {
 			if gotKey != 3 || gotActive == nil || *gotActive != tc.active {
 				t.Errorf("SetKeyActive(key %d, %v), want (3, %v)", gotKey, gotActive, tc.active)
 			}
-			if !strings.Contains(fx.Stdout.String(), fmt.Sprintf("active: %s", map[bool]string{true: "yes", false: "no"}[tc.active])) {
+			want := fmt.Sprintf("%sd key 3 in example.com (", tc.cmd)
+			if !strings.Contains(fx.Stdout.String(), want) ||
+				!strings.Contains(fx.Stdout.String(), fmt.Sprintf("active: %s", map[bool]string{true: "yes", false: "no"}[tc.active])) {
 				t.Errorf("unexpected output:\n%s", fx.Stdout.String())
 			}
 		})
