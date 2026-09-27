@@ -97,3 +97,26 @@ func TestZoneWithNameservers(t *testing.T) {
 		t.Errorf("ZoneWithNameservers.Nameservers = %v", out.Nameservers)
 	}
 }
+
+func TestRecordFromSDKPriority(t *testing.T) {
+	cases := []struct {
+		typ  string
+		prio int
+		want *int
+	}{
+		{"MX", 10, new(10)},
+		{"SRV", 0, new(0)},
+		{"mx", 5, new(5)},
+		{"A", 0, nil},
+		{"TXT", 7, nil},
+	}
+	for _, c := range cases {
+		out := schema.RecordFromSDK(&poweradmin.Record{Type: c.typ, Priority: c.prio})
+		switch {
+		case c.want == nil && out.Priority != nil:
+			t.Errorf("%s: Priority = %d, want nil", c.typ, *out.Priority)
+		case c.want != nil && (out.Priority == nil || *out.Priority != *c.want):
+			t.Errorf("%s: Priority = %v, want %d", c.typ, out.Priority, *c.want)
+		}
+	}
+}
