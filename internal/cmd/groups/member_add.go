@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewMemberAddCmd returns a new "groups member-add" command instance.
+// NewMemberAddCmd returns a new "groups members add" command instance.
 func NewMemberAddCmd(s *state.State) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "member-add",
+		Use:   "add",
 		Short: "Add a user to a group",
 		Long:  `Add a user to a Poweradmin group by group and user ID.`,
 		RunE: func(cmd *cobra.Command, args []string) error {

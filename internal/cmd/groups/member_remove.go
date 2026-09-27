@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewMemberRemoveCmd returns a new "groups member-remove" command instance.
+// NewMemberRemoveCmd returns a new "groups members remove" command instance.
 func NewMemberRemoveCmd(s *state.State) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "member-remove",
+		Use:   "remove",
 		Short: "Remove a user from a group",
 		Long:  `Remove a user from a Poweradmin group by group and user ID.`,
 		RunE: func(cmd *cobra.Command, args []string) error {

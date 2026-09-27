@@ -228,19 +228,19 @@ poweradmin zones import --file example.com.zone --create-zone
 poweradmin zones import --file example.com.zone --dry-run
 
 # List all metadata entries for a zone
-poweradmin zones metadata --name example.com
-poweradmin zones metadata --name example.com -o json
+poweradmin zones metadata list --name example.com
+poweradmin zones metadata list --name example.com -o json
 
 # Get metadata for a specific kind
-poweradmin zones metadata-get --name example.com --kind ALLOW-AXFR-FROM
+poweradmin zones metadata get --name example.com --kind ALLOW-AXFR-FROM
 
 # Set (replace) metadata values for a kind
-poweradmin zones metadata-set --name example.com \
+poweradmin zones metadata set --name example.com \
   --kind ALLOW-AXFR-FROM \
   --values 192.0.2.10,AUTO-NS
 
 # Delete metadata for a kind
-poweradmin zones metadata-delete --name example.com --kind ALLOW-AXFR-FROM --yes
+poweradmin zones metadata delete --name example.com --kind ALLOW-AXFR-FROM --yes
 ```
 
 ### Records
@@ -370,14 +370,14 @@ poweradmin groups delete --interactive
 poweradmin groups delete --name "Zone Editors" --dry-run
 
 # Manage members
-poweradmin groups members --name Administrators
-poweradmin groups member-add --group-id 1 --user-id 2
-poweradmin groups member-remove --group-id 1 --user-id 2
+poweradmin groups members list --name Administrators
+poweradmin groups members add --group-id 1 --user-id 2
+poweradmin groups members remove --group-id 1 --user-id 2
 
 # Manage zones
-poweradmin groups zones --name Administrators
-poweradmin groups zone-add --group-id 1 --zone-id 78
-poweradmin groups zone-remove --group-id 1 --zone-id 78
+poweradmin groups zones list --name Administrators
+poweradmin groups zones add --group-id 1 --zone-id 78
+poweradmin groups zones remove --group-id 1 --zone-id 78
 ```
 
 ### Permission Templates
@@ -461,6 +461,25 @@ poweradmin zones export --name example.com > example.com.zone
 POWERADMIN_URL=https://new-dns.example.com \
   poweradmin zones import --file example.com.zone --create-zone
 ```
+
+### Renamed commands
+
+Some subcommands moved into groups. The old names still work but are hidden
+from the help and print a deprecation note; they will be removed in the next
+major release.
+
+| Old                         | New                            |
+| --------------------------- | ------------------------------ |
+| `zones metadata-get`        | `zones metadata get`           |
+| `zones metadata-set`        | `zones metadata set`           |
+| `zones metadata-delete`     | `zones metadata delete`        |
+| `groups member-add`         | `groups members add`           |
+| `groups member-remove`      | `groups members remove`        |
+| `groups zone-add`           | `groups zones add`             |
+| `groups zone-remove`        | `groups zones remove`          |
+
+`zones metadata`, `groups members` and `groups zones` without a subcommand
+still list, like their new `list` subcommands.
 
 ## Security
 

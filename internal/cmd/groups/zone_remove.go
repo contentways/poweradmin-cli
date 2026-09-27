@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewZoneRemoveCmd returns a new "groups zone-remove" command instance.
+// NewZoneRemoveCmd returns a new "groups zones remove" command instance.
 func NewZoneRemoveCmd(s *state.State) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "zone-remove",
+		Use:   "remove",
 		Short: "Remove a zone from a group",
 		Long:  `Disassociate a zone from a Poweradmin group.`,
 		RunE: func(cmd *cobra.Command, args []string) error {

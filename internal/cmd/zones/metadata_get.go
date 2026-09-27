@@ -12,10 +12,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewMetadataGetCmd returns a new "zones metadata-get" command instance.
+// NewMetadataGetCmd returns a new "zones metadata get" command instance.
 func NewMetadataGetCmd(s *state.State) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "metadata-get",
+		Use:   "get",
 		Short: "Get zone metadata by kind",
 		Long:  `Get the values stored under a specific metadata kind (e.g. ALLOW-AXFR-FROM) for a Poweradmin zone.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
