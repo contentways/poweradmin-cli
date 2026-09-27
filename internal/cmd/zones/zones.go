@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 // Package zones provides CLI commands for managing DNS zones in Poweradmin.
-// Available subcommands: list, get, create, delete, export, import, metadata.
+// Available subcommands: list, get, create, delete, export, import, metadata, dnssec.
 package zones
 
 import (
@@ -18,7 +18,7 @@ func NewZonesCommand(s *state.State) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "zones",
 		Short: "Manage DNS zones",
-		Long:  `Manage DNS zones in Poweradmin — list, get, create, delete, export and import zones, and manage their metadata.`,
+		Long:  `Manage DNS zones in Poweradmin — list, get, create, delete, export and import zones, and manage their metadata and DNSSEC.`,
 	}
 
 	cmd.AddCommand(NewListCmd(s))
@@ -28,6 +28,7 @@ func NewZonesCommand(s *state.State) *cobra.Command {
 	cmd.AddCommand(NewExportCmd(s))
 	cmd.AddCommand(NewImportCmd(s))
 	cmd.AddCommand(NewMetadataGroupCmd(s))
+	cmd.AddCommand(NewDNSSECCmd(s))
 
 	// Flat names from before the metadata commands were grouped.
 	cmd.AddCommand(base.DeprecatedAlias(NewMetadataGetCmd(s), "metadata-get", "zones metadata get"))

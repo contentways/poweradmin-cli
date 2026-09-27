@@ -106,3 +106,11 @@ func (f *Fixture) WithServer(server poweradmin.IServerClient) *Fixture {
 	f.State.MockClient.Server = server
 	return f
 }
+
+// WithDNSSEC injects a mock DNSSEC client into the fixture's client. The
+// fixture must have been created with NewFixtureWithMocks or
+// NewFixtureWithAllMocks.
+func (f *Fixture) WithDNSSEC(dnssec poweradmin.IDNSSECClient) *Fixture {
+	f.State.MockClient.DNSSEC = dnssec
+	return f
+}

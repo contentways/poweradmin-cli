@@ -243,6 +243,30 @@ poweradmin zones metadata set --name example.com \
 poweradmin zones metadata delete --name example.com --kind ALLOW-AXFR-FROM --yes
 ```
 
+### DNSSEC
+
+Key management and rectify need Poweradmin 4.5 or newer. Changing DNSSEC
+requires the `zone_dnssec_manage_own` permission for the zone.
+
+```bash
+# Show the DNSSEC status and the DS records to publish at the registrar
+poweradmin zones dnssec status --name example.com
+
+# Sign / unsign a zone
+poweradmin zones dnssec enable --name example.com
+poweradmin zones dnssec disable --name example.com --yes
+
+# Manage keys (new keys are inactive unless --active is set)
+poweradmin zones dnssec keys list --name example.com
+poweradmin zones dnssec keys add --name example.com --type csk --algorithm ecdsa256 --bits 256 --active
+poweradmin zones dnssec keys deactivate --name example.com --key-id 3
+poweradmin zones dnssec keys activate --name example.com --key-id 3
+poweradmin zones dnssec keys delete --name example.com --key-id 3 --yes
+
+# Rectify a signed zone
+poweradmin zones dnssec rectify --name example.com
+```
+
 ### Records
 
 ```bash
