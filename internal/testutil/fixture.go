@@ -98,3 +98,11 @@ func NewFixtureWithAllMocks(t *testing.T, zone poweradmin.IZoneClient, record po
 		Stderr: &bytes.Buffer{},
 	}
 }
+
+// WithServer injects a mock Server client into the fixture's client. The
+// fixture must have been created with NewFixtureWithMocks or
+// NewFixtureWithAllMocks.
+func (f *Fixture) WithServer(server poweradmin.IServerClient) *Fixture {
+	f.State.MockClient.Server = server
+	return f
+}

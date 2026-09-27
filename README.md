@@ -415,6 +415,26 @@ poweradmin permission-templates delete --interactive
 poweradmin permission-templates delete --name "Zone Editors" --dry-run
 ```
 
+### Server
+
+Requires Poweradmin 4.5 or newer and the `server_status_view` permission
+(administrators have it implicitly).
+
+```bash
+# Running state, version and uptime of the PowerDNS server
+poweradmin server status
+
+# Selected or all metrics
+poweradmin server status --metrics uptime,udp-queries
+poweradmin server status --show-metrics -o json
+
+# Also probe the autoprimary servers (needs supermaster_view)
+poweradmin server status --include-slaves
+```
+
+`server status` exits with a non-zero status when PowerDNS is not reachable,
+so it can be used directly in monitoring checks.
+
 ### Version
 
 ```bash
