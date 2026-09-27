@@ -1,5 +1,11 @@
 # Changelog
 
+## [v3.6.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.6.0)
+
+### Features
+
+- **records**: show priority and keep long content from breaking the table
+
 ## [v3.5.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.5.0)
 
 ### Features
