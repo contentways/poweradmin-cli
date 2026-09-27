@@ -1,0 +1,34 @@
+## poweradmin zones metadata get
+
+Get zone metadata by kind
+
+### Synopsis
+
+Get the values stored under a specific metadata kind (e.g. ALLOW-AXFR-FROM) for a Poweradmin zone.
+
+```
+poweradmin zones metadata get [flags]
+```
+
+### Options
+
+```
+  -h, --help            help for get
+      --id string       Zone ID
+      --kind string     Metadata kind (e.g. ALLOW-AXFR-FROM) (required)
+      --name string     Zone name (e.g. example.com)
+  -o, --output string   Output format. One of: table|json|yaml (default "table")
+```
+
+### Options inherited from parent commands
+
+```
+  -k, --api-key string   Poweradmin API key (overrides config and env)
+  -u, --url string       Poweradmin URL (e.g. https://dns.example.com)
+  -v, --verbose          Log HTTP requests/responses to stderr for debugging
+```
+
+### SEE ALSO
+
+* [poweradmin zones metadata](poweradmin_zones_metadata.md)	 - Manage zone metadata
+

@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewZoneAddCmd returns a new "groups zone-add" command instance.
+// NewZoneAddCmd returns a new "groups zones add" command instance.
 func NewZoneAddCmd(s *state.State) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "zone-add",
+		Use:   "add",
 		Short: "Add a zone to a group",
 		Long:  `Associate a zone with a Poweradmin group.`,
 		RunE: func(cmd *cobra.Command, args []string) error {

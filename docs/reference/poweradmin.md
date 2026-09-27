@@ -20,6 +20,7 @@ poweradmin is a command-line tool for managing DNS zones and records via the Pow
 * [poweradmin groups](poweradmin_groups.md)	 - Manage Poweradmin groups
 * [poweradmin permission-templates](poweradmin_permission-templates.md)	 - Manage Poweradmin permission templates
 * [poweradmin records](poweradmin_records.md)	 - Manage DNS records
+* [poweradmin server](poweradmin_server.md)	 - Inspect the PowerDNS server
 * [poweradmin users](poweradmin_users.md)	 - Manage Poweradmin users
 * [poweradmin version](poweradmin_version.md)	 - Print the version of poweradmin
 * [poweradmin zones](poweradmin_zones.md)	 - Manage DNS zones

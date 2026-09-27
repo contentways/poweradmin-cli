@@ -1,10 +1,12 @@
 ## poweradmin groups zones
 
-List zones of a group
+Manage zones of a group
 
 ### Synopsis
 
-List all zones associated with a Poweradmin group.
+Manage the zones assigned to a Poweradmin group.
+
+Without a subcommand the zones of the group are listed, like "groups zones list".
 
 ```
 poweradmin groups zones [flags]
@@ -31,4 +33,7 @@ poweradmin groups zones [flags]
 ### SEE ALSO
 
 * [poweradmin groups](poweradmin_groups.md)	 - Manage Poweradmin groups
+* [poweradmin groups zones add](poweradmin_groups_zones_add.md)	 - Add a zone to a group
+* [poweradmin groups zones list](poweradmin_groups_zones_list.md)	 - List zones of a group
+* [poweradmin groups zones remove](poweradmin_groups_zones_remove.md)	 - Remove a zone from a group
 

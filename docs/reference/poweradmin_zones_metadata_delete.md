@@ -1,4 +1,4 @@
-## poweradmin zones metadata-delete
+## poweradmin zones metadata delete
 
 Delete zone metadata for a kind
 
@@ -7,13 +7,13 @@ Delete zone metadata for a kind
 Delete all values for a metadata kind (e.g. ALLOW-AXFR-FROM) on a Poweradmin zone.
 
 ```
-poweradmin zones metadata-delete [flags]
+poweradmin zones metadata delete [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help          help for metadata-delete
+  -h, --help          help for delete
       --id string     Zone ID
       --kind string   Metadata kind (e.g. ALLOW-AXFR-FROM) (required)
       --name string   Zone name (e.g. example.com)
@@ -31,5 +31,5 @@ poweradmin zones metadata-delete [flags]
 
 ### SEE ALSO
 
-* [poweradmin zones](poweradmin_zones.md)	 - Manage DNS zones
+* [poweradmin zones metadata](poweradmin_zones_metadata.md)	 - Manage zone metadata
 

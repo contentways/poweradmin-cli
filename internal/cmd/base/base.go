@@ -289,3 +289,12 @@ func PermissionTemplateNameCompletion(s *state.State) func(*cobra.Command, []str
 		return names, cobra.ShellCompDirectiveNoFileComp
 	}
 }
+
+// DeprecatedAlias registers cmd under its old, flat name as a hidden alias of
+// a command that moved into a nested group. The alias keeps working, but
+// Cobra hides it from help and prints a note pointing to the replacement.
+func DeprecatedAlias(cmd *cobra.Command, oldName, replacement string) *cobra.Command {
+	cmd.Use = oldName
+	cmd.Deprecated = fmt.Sprintf("use %q instead", replacement)
+	return cmd
+}

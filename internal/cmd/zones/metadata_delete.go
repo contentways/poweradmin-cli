@@ -10,10 +10,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewMetadataDeleteCmd returns a new "zones metadata-delete" command instance.
+// NewMetadataDeleteCmd returns a new "zones metadata delete" command instance.
 func NewMetadataDeleteCmd(s *state.State) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "metadata-delete",
+		Use:   "delete",
 		Short: "Delete zone metadata for a kind",
 		Long:  `Delete all values for a metadata kind (e.g. ALLOW-AXFR-FROM) on a Poweradmin zone.`,
 		RunE: func(cmd *cobra.Command, args []string) error {

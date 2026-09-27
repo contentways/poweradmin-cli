@@ -12,10 +12,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewMetadataSetCmd returns a new "zones metadata-set" command instance.
+// NewMetadataSetCmd returns a new "zones metadata set" command instance.
 func NewMetadataSetCmd(s *state.State) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "metadata-set",
+		Use:   "set",
 		Short: "Set (replace) zone metadata for a kind",
 		Long:  `Create or replace all values for a metadata kind (e.g. ALLOW-AXFR-FROM) on a Poweradmin zone.`,
 		RunE: func(cmd *cobra.Command, args []string) error {

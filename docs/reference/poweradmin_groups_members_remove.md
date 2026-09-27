@@ -1,4 +1,4 @@
-## poweradmin groups member-remove
+## poweradmin groups members remove
 
 Remove a user from a group
 
@@ -7,14 +7,14 @@ Remove a user from a group
 Remove a user from a Poweradmin group by group and user ID.
 
 ```
-poweradmin groups member-remove [flags]
+poweradmin groups members remove [flags]
 ```
 
 ### Options
 
 ```
       --group-id string   Group ID (required)
-  -h, --help              help for member-remove
+  -h, --help              help for remove
       --user-id string    User ID to remove (required)
 ```
 
@@ -28,5 +28,5 @@ poweradmin groups member-remove [flags]
 
 ### SEE ALSO
 
-* [poweradmin groups](poweradmin_groups.md)	 - Manage Poweradmin groups
+* [poweradmin groups members](poweradmin_groups_members.md)	 - Manage members of a group
 

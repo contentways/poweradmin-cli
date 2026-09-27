@@ -22,8 +22,8 @@ func TestNewRootCommand(t *testing.T) {
 		t.Fatalf("Use = %q", cmd.Use)
 	}
 
-	if len(cmd.Commands()) != 6 {
-		t.Fatalf("got %d commands, want 6", len(cmd.Commands()))
+	if len(cmd.Commands()) != 7 {
+		t.Fatalf("got %d commands, want 7", len(cmd.Commands()))
 	}
 }
 
