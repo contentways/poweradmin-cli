@@ -1,10 +1,12 @@
 ## poweradmin groups members
 
-List members of a group
+Manage members of a group
 
 ### Synopsis
 
-List all members of a Poweradmin group.
+Manage the users of a Poweradmin group.
+
+Without a subcommand the members of the group are listed, like "groups members list".
 
 ```
 poweradmin groups members [flags]
@@ -31,4 +33,7 @@ poweradmin groups members [flags]
 ### SEE ALSO
 
 * [poweradmin groups](poweradmin_groups.md)	 - Manage Poweradmin groups
+* [poweradmin groups members add](poweradmin_groups_members_add.md)	 - Add a user to a group
+* [poweradmin groups members list](poweradmin_groups_members_list.md)	 - List members of a group
+* [poweradmin groups members remove](poweradmin_groups_members_remove.md)	 - Remove a user from a group
 

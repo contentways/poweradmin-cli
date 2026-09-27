@@ -1,0 +1,34 @@
+## poweradmin groups members list
+
+List members of a group
+
+### Synopsis
+
+List all members of a Poweradmin group.
+
+```
+poweradmin groups members list [flags]
+```
+
+### Options
+
+```
+  -h, --help            help for list
+      --id string       Group ID
+      --name string     Group name
+      --no-header       Suppress table header row
+  -o, --output string   Output format. One of: table|json|yaml (default "table")
+```
+
+### Options inherited from parent commands
+
+```
+  -k, --api-key string   Poweradmin API key (overrides config and env)
+  -u, --url string       Poweradmin URL (e.g. https://dns.example.com)
+  -v, --verbose          Log HTTP requests/responses to stderr for debugging
+```
+
+### SEE ALSO
+
+* [poweradmin groups members](poweradmin_groups_members.md)	 - Manage members of a group
+
