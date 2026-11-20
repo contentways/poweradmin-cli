@@ -1,4 +1,4 @@
-## poweradmin groups zone-remove
+## poweradmin groups zones remove
 
 Remove a zone from a group
 
@@ -7,14 +7,14 @@ Remove a zone from a group
 Disassociate a zone from a Poweradmin group.
 
 ```
-poweradmin groups zone-remove [flags]
+poweradmin groups zones remove [flags]
 ```
 
 ### Options
 
 ```
       --group-id string   Group ID (required)
-  -h, --help              help for zone-remove
+  -h, --help              help for remove
       --zone-id string    Zone ID to remove (required)
 ```
 
@@ -28,5 +28,5 @@ poweradmin groups zone-remove [flags]
 
 ### SEE ALSO
 
-* [poweradmin groups](poweradmin_groups.md)	 - Manage Poweradmin groups
+* [poweradmin groups zones](poweradmin_groups_zones.md)	 - Manage zones of a group
 

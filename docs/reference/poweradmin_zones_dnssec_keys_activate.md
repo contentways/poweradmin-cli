@@ -1,23 +1,26 @@
-## poweradmin zones metadata-get
+## poweradmin zones dnssec keys activate
 
-Get zone metadata by kind
-
-### Synopsis
-
-Get the values stored under a specific metadata kind (e.g. ALLOW-AXFR-FROM) for a Poweradmin zone.
+Activate a DNSSEC key
 
 ```
-poweradmin zones metadata-get [flags]
+poweradmin zones dnssec keys activate [flags]
+```
+
+### Examples
+
+```
+  poweradmin zones dnssec keys activate --name example.com --key-id 3
 ```
 
 ### Options
 
 ```
-  -h, --help            help for metadata-get
+  -h, --help            help for activate
       --id string       Zone ID
-      --kind string     Metadata kind (e.g. ALLOW-AXFR-FROM) (required)
+      --key-id int      Key ID (required, see "zones dnssec keys list")
       --name string     Zone name (e.g. example.com)
   -o, --output string   Output format. One of: table|json|yaml (default "table")
+  -q, --quiet           Suppress output
 ```
 
 ### Options inherited from parent commands
@@ -30,5 +33,5 @@ poweradmin zones metadata-get [flags]
 
 ### SEE ALSO
 
-* [poweradmin zones](poweradmin_zones.md)	 - Manage DNS zones
+* [poweradmin zones dnssec keys](poweradmin_zones_dnssec_keys.md)	 - Manage the DNSSEC keys of a zone
 

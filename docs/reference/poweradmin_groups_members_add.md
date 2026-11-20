@@ -1,21 +1,21 @@
-## poweradmin groups zone-add
+## poweradmin groups members add
 
-Add a zone to a group
+Add a user to a group
 
 ### Synopsis
 
-Associate a zone with a Poweradmin group.
+Add a user to a Poweradmin group by group and user ID.
 
 ```
-poweradmin groups zone-add [flags]
+poweradmin groups members add [flags]
 ```
 
 ### Options
 
 ```
       --group-id string   Group ID (required)
-  -h, --help              help for zone-add
-      --zone-id string    Zone ID to add (required)
+  -h, --help              help for add
+      --user-id string    User ID to add (required)
 ```
 
 ### Options inherited from parent commands
@@ -28,5 +28,5 @@ poweradmin groups zone-add [flags]
 
 ### SEE ALSO
 
-* [poweradmin groups](poweradmin_groups.md)	 - Manage Poweradmin groups
+* [poweradmin groups members](poweradmin_groups_members.md)	 - Manage members of a group
 

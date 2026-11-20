@@ -1,10 +1,12 @@
 ## poweradmin zones metadata
 
-List metadata entries for a DNS zone
+Manage zone metadata
 
 ### Synopsis
 
-List all metadata entries (e.g. ALLOW-AXFR-FROM) for a Poweradmin zone.
+Manage metadata entries (e.g. ALLOW-AXFR-FROM) of a Poweradmin zone.
+
+Without a subcommand the metadata of the zone is listed, like "zones metadata list".
 
 ```
 poweradmin zones metadata [flags]
@@ -31,4 +33,8 @@ poweradmin zones metadata [flags]
 ### SEE ALSO
 
 * [poweradmin zones](poweradmin_zones.md)	 - Manage DNS zones
+* [poweradmin zones metadata delete](poweradmin_zones_metadata_delete.md)	 - Delete zone metadata for a kind
+* [poweradmin zones metadata get](poweradmin_zones_metadata_get.md)	 - Get zone metadata by kind
+* [poweradmin zones metadata list](poweradmin_zones_metadata_list.md)	 - List metadata entries for a DNS zone
+* [poweradmin zones metadata set](poweradmin_zones_metadata_set.md)	 - Set (replace) zone metadata for a kind
 

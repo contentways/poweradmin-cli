@@ -228,19 +228,43 @@ poweradmin zones import --file example.com.zone --create-zone
 poweradmin zones import --file example.com.zone --dry-run
 
 # List all metadata entries for a zone
-poweradmin zones metadata --name example.com
-poweradmin zones metadata --name example.com -o json
+poweradmin zones metadata list --name example.com
+poweradmin zones metadata list --name example.com -o json
 
 # Get metadata for a specific kind
-poweradmin zones metadata-get --name example.com --kind ALLOW-AXFR-FROM
+poweradmin zones metadata get --name example.com --kind ALLOW-AXFR-FROM
 
 # Set (replace) metadata values for a kind
-poweradmin zones metadata-set --name example.com \
+poweradmin zones metadata set --name example.com \
   --kind ALLOW-AXFR-FROM \
   --values 192.0.2.10,AUTO-NS
 
 # Delete metadata for a kind
-poweradmin zones metadata-delete --name example.com --kind ALLOW-AXFR-FROM --yes
+poweradmin zones metadata delete --name example.com --kind ALLOW-AXFR-FROM --yes
+```
+
+### DNSSEC
+
+Key management and rectify need Poweradmin 4.5 or newer. Changing DNSSEC
+requires the `zone_dnssec_manage_own` permission for the zone.
+
+```bash
+# Show the DNSSEC status and the DS records to publish at the registrar
+poweradmin zones dnssec status --name example.com
+
+# Sign / unsign a zone
+poweradmin zones dnssec enable --name example.com
+poweradmin zones dnssec disable --name example.com --yes
+
+# Manage keys (new keys are inactive unless --active is set)
+poweradmin zones dnssec keys list --name example.com
+poweradmin zones dnssec keys add --name example.com --type csk --algorithm ecdsa256 --bits 256 --active
+poweradmin zones dnssec keys deactivate --name example.com --key-id 3
+poweradmin zones dnssec keys activate --name example.com --key-id 3
+poweradmin zones dnssec keys delete --name example.com --key-id 3 --yes
+
+# Rectify a signed zone
+poweradmin zones dnssec rectify --name example.com
 ```
 
 ### Records
@@ -370,14 +394,14 @@ poweradmin groups delete --interactive
 poweradmin groups delete --name "Zone Editors" --dry-run
 
 # Manage members
-poweradmin groups members --name Administrators
-poweradmin groups member-add --group-id 1 --user-id 2
-poweradmin groups member-remove --group-id 1 --user-id 2
+poweradmin groups members list --name Administrators
+poweradmin groups members add --group-id 1 --user-id 2
+poweradmin groups members remove --group-id 1 --user-id 2
 
 # Manage zones
-poweradmin groups zones --name Administrators
-poweradmin groups zone-add --group-id 1 --zone-id 78
-poweradmin groups zone-remove --group-id 1 --zone-id 78
+poweradmin groups zones list --name Administrators
+poweradmin groups zones add --group-id 1 --zone-id 78
+poweradmin groups zones remove --group-id 1 --zone-id 78
 ```
 
 ### Permission Templates
@@ -414,6 +438,26 @@ poweradmin permission-templates delete --interactive
 # Preview what would be deleted without making changes
 poweradmin permission-templates delete --name "Zone Editors" --dry-run
 ```
+
+### Server
+
+Requires Poweradmin 4.5 or newer and the `server_status_view` permission
+(administrators have it implicitly).
+
+```bash
+# Running state, version and uptime of the PowerDNS server
+poweradmin server status
+
+# Selected or all metrics
+poweradmin server status --metrics uptime,udp-queries
+poweradmin server status --show-metrics -o json
+
+# Also probe the autoprimary servers (needs supermaster_view)
+poweradmin server status --include-slaves
+```
+
+`server status` exits with a non-zero status when PowerDNS is not reachable,
+so it can be used directly in monitoring checks.
 
 ### Version
 
@@ -461,6 +505,25 @@ poweradmin zones export --name example.com > example.com.zone
 POWERADMIN_URL=https://new-dns.example.com \
   poweradmin zones import --file example.com.zone --create-zone
 ```
+
+### Renamed commands
+
+Some subcommands moved into groups. The old names still work but are hidden
+from the help and print a deprecation note; they will be removed in the next
+major release.
+
+| Old                         | New                            |
+| --------------------------- | ------------------------------ |
+| `zones metadata-get`        | `zones metadata get`           |
+| `zones metadata-set`        | `zones metadata set`           |
+| `zones metadata-delete`     | `zones metadata delete`        |
+| `groups member-add`         | `groups members add`           |
+| `groups member-remove`      | `groups members remove`        |
+| `groups zone-add`           | `groups zones add`             |
+| `groups zone-remove`        | `groups zones remove`          |
+
+`zones metadata`, `groups members` and `groups zones` without a subcommand
+still list, like their new `list` subcommands.
 
 ## Security
 

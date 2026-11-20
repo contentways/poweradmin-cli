@@ -1,4 +1,4 @@
-## poweradmin zones metadata-set
+## poweradmin zones metadata set
 
 Set (replace) zone metadata for a kind
 
@@ -7,13 +7,13 @@ Set (replace) zone metadata for a kind
 Create or replace all values for a metadata kind (e.g. ALLOW-AXFR-FROM) on a Poweradmin zone.
 
 ```
-poweradmin zones metadata-set [flags]
+poweradmin zones metadata set [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help             help for metadata-set
+  -h, --help             help for set
       --id string        Zone ID
       --kind string      Metadata kind (e.g. ALLOW-AXFR-FROM) (required)
       --name string      Zone name (e.g. example.com)
@@ -32,5 +32,5 @@ poweradmin zones metadata-set [flags]
 
 ### SEE ALSO
 
-* [poweradmin zones](poweradmin_zones.md)	 - Manage DNS zones
+* [poweradmin zones metadata](poweradmin_zones_metadata.md)	 - Manage zone metadata
 

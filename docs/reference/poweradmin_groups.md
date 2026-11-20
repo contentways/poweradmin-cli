@@ -27,11 +27,7 @@ Manage Poweradmin groups — list, get, create, update, delete and manage member
 * [poweradmin groups delete](poweradmin_groups_delete.md)	 - Delete a group
 * [poweradmin groups get](poweradmin_groups_get.md)	 - Get a group by name or ID
 * [poweradmin groups list](poweradmin_groups_list.md)	 - List all groups
-* [poweradmin groups member-add](poweradmin_groups_member-add.md)	 - Add a user to a group
-* [poweradmin groups member-remove](poweradmin_groups_member-remove.md)	 - Remove a user from a group
-* [poweradmin groups members](poweradmin_groups_members.md)	 - List members of a group
+* [poweradmin groups members](poweradmin_groups_members.md)	 - Manage members of a group
 * [poweradmin groups update](poweradmin_groups_update.md)	 - Update a group
-* [poweradmin groups zone-add](poweradmin_groups_zone-add.md)	 - Add a zone to a group
-* [poweradmin groups zone-remove](poweradmin_groups_zone-remove.md)	 - Remove a zone from a group
-* [poweradmin groups zones](poweradmin_groups_zones.md)	 - List zones of a group
+* [poweradmin groups zones](poweradmin_groups_zones.md)	 - Manage zones of a group
 
