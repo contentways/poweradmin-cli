@@ -1,5 +1,16 @@
 # Changelog
 
+## [v3.7.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.7.0)
+
+### Features
+
+- **server**: add server status command
+- **dnssec**: add zones dnssec commands
+
+### Bug Fixes
+
+- **dnssec**: clearer messages for added and toggled keys
+
 ## [v3.6.0](https://github.com/contentways/poweradmin-cli/releases/tag/v3.6.0)
 
 ### Features
